@@ -42,8 +42,12 @@ def process_directory(source_path, target_base_path):
     # Store all cookie files and their comments for README generation
     cookie_files = {}
 
+    files = []
+    files_pattern = ["*.cookie", "tang300", "song100"]
+    for pattern in files_pattern:
+        files.extend(source_path.rglob(pattern))
     # Find all directories containing .cookie files
-    for cookie_file in source_path.rglob("*.cookie"):
+    for cookie_file in files:
         cookie_dir = cookie_file.parent
         relative_dir = cookie_dir.relative_to(source_path)
         
