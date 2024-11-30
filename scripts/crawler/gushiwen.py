@@ -6,19 +6,171 @@ import random
 import json
 import os
 from urllib.parse import urljoin
+from dataclasses import dataclass
 
 from loguru import logger
 
-class GushiwenCrawler:
-    def __init__(self):
-        self.mingju_url = "https://www.gushiwen.cn/mingjus/default.aspx?page={page}&tstr={title}&astr=&cstr=&xstr="
-        self.gushi_url = "https://www.gushiwen.cn/gushi/{title}.aspx"
+@dataclass
+class Cookie:
+    title: str
+    author: str
+    content: str
+    source: str
+    type: str
+    content_link: str
+    source_link: str
+
+    def to_json(self):
+        return json.dumps(
+            {
+                "type": self.type,
+                "title": self.title,
+                "author": self.author,
+                "content": self.content,
+                "source": self.source,
+                "content_link": self.content_link,
+                "source_link": self.source_link,
+            },
+            ensure_ascii=False,
+        )
+
+    @staticmethod
+    def from_json(json_str):
+        data = json.loads(json_str)
+        return Cookie(
+            type=data["type"],
+            title=data["title"],
+            author=data["author"],
+            content=data["content"],
+            source=data["source"],
+            content_link=data["content_link"],
+            source_link=data["source_link"],
+        )
+    
+    @staticmethod
+    def from_dict(data):
+        return Cookie(
+            title=data["title"],
+            author=data["author"],
+            content=data["content"],
+            source=data["source"],
+            content_link=data["content_link"],
+            source_link=data["source_link"],
+            type=data["type"],
+        )
+    
+    def __str__(self):
+        if self.type == "mingju":
+            return f"{self.content}\n -- {self.source}\n%"
+        else:
+            return f"《{self.title}》 -- {self.author}\n{self.content}\n%"
+
+class Parser:
+    def __init__(self, base_url: str, parser_type: str):
+        self.base_url = base_url
+        self.parser_type = parser_type
+
+    def get_text(self, element):
+        """获取文本内容"""
+        if not element:
+            return None
+        # 保留换行信息
+        for br in element.find_all("br"):
+            br.replace_with("\n")
+        for p in element.find_all("p"):
+            p.replace_with("\n" + p.text)
+        return element.text.strip()
+
+    def get_link(self, link):
+        if link and link.has_attr("href"):
+            return urljoin(self.base_url, link["href"])
+        return None
+
+    def parse_item(self, element) -> Cookie:
+        raise NotImplementedError
+
+    def parse_list(self, element) -> list[str]:
+        raise NotImplementedError
+    
+
+class MingJuParser(Parser):
+    def __init__(self, base_url: str, parser_type: str = "mingju"):
+        super().__init__(base_url, parser_type)
+
+    def parse_item(self, element) -> Cookie:
+        if not element:
+            return None
+        try:
+            links = element.find_all("a")
+            if links and len(links) == 2:
+                cookie = Cookie(
+                    title=self.get_text(links[1]),
+                    author="",
+                    content=self.get_text(links[0]),
+                    source="",
+                    content_link=self.get_link(links[0]),
+                    source_link=self.get_link(links[1]),
+                    type=self.parser_type,
+                )
+                return cookie
+            else:
+                return None
+        except Exception as e:
+            print(f"Error parsing cookie: {str(e)}")
+            return None
+
+class GuShiParser(Parser):
+    def __init__(self, base_url: str, parser_type: str = "gushi"):
+        super().__init__(base_url, parser_type)
+
+    def parse_item(self, element) -> Cookie:
+        if not element:
+            return None
+        try:
+            cookie = Cookie(
+                title=self.get_text(element.find("h1")),
+                author=self.get_text(element.find("p", class_="source")),
+                content=self.get_text(element.find("div", class_="contson")),
+                source="",
+                content_link="",
+                source_link="",
+                type=self.parser_type,
+            )
+            return cookie
+        except Exception as e:
+            print(f"Error parsing cookie: {str(e)}")
+            return None
+        
+    def parse_list(self, element) -> list[str]:
+        if not element:
+            return []
+        section = element.find("div", class_="sons")
+        if not section:
+            return []
+        links = section.find_all("a")
+        return [self.get_link(link) for link in links]
+
+class ShiWenParser(GuShiParser):
+    def __init__(self, base_url: str, parser_type: str = "shiwen"):
+        super().__init__(base_url, parser_type)
+
+    def parse_list(self, element) -> list[str]:
+        if not element:
+            return []
+        section = element.find("div", class_="typecont")
+        if not section:
+            return []
+        links = section.find_all("a")
+        return [self.get_link(link) for link in links]
+
+class Crawler:
+    def __init__(self, base_url: str = ""):
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
         }
-        self.saved_links = set()
-        self.data_dir = "data"
-        os.makedirs(self.data_dir, exist_ok=True)
+        self.base_url = base_url
+        self.cache = set()
+        self.max_page = 100
 
     def get_page(self, url):
         """获取页面内容并返回 BeautifulSoup 对象"""
@@ -33,73 +185,55 @@ class GushiwenCrawler:
             print(f"Error fetching {url}: {str(e)}")
             return None
         
-    def get_file_link(self, title):
-        return f"{self.data_dir}/{title}.jsonl"
-
-    def get_text(self, element):
-        """获取文本内容"""
-        if not element:
-            return None
-        # 保留换行信息
-        for br in element.find_all("br"):
-            br.replace_with("\n")
-        for p in element.find_all("p"):
-            p.replace_with("\n" + p.text)
-        return element.text.strip()
-    
-    def print_dot(self):
-        print(".", end="", flush=True)
-        sys.stdout.flush()
-
-    def parse_mingju(self, cookie):
-        """解析名句"""
-        try:
-            links = cookie.find_all("a")
-            if links and len(links) == 2:
-                content = self.get_text(links[0])
-                source = self.get_text(links[1])
-                content_link = urljoin(self.mingju_url, links[0]["href"])
-                source_link = urljoin(self.mingju_url, links[1]["href"])
-                return content, source, content_link, source_link
-            else:
-                return None, None, None, None
-        except Exception as e:
-            print(f"Error parsing cookie: {str(e)}")
-            return None, None, None, None
-
-    def save_mingju(self, title, content, source, content_link, source_link):
-        """保存名句"""
-        with open(self.get_file_link(title), "a", encoding="utf-8") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "content": content,
-                        "source": source,
-                        "content_link": content_link,
-                        "source_link": source_link,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-        self.saved_links.add(content_link)
-
-    def crawl_mingju(self, title: str, start_page=1, end_page=1):
-        """爬取指定页数的名句"""
-        logger.info(f"开始爬取 《{title}》")
-        # 加载已保存的名句链接
-        self.data_dir = "data/mingju"
-        self.saved_links = set()
-        file_link = self.get_file_link(title)
+    def load(self, file_link) -> list[Cookie]:
+        """加载已保存的数据"""
+        self.cache = set()
+        cookies = []
         if os.path.exists(file_link):
             with open(file_link, "r", encoding="utf-8") as f:
                 for line in f:
-                    cookie = json.loads(line)
-                    self.saved_links.add(cookie["content_link"])
-            logger.debug(f"已加载已保存的名句 {len(self.saved_links)} 条")
+                    cookie = Cookie.from_json(line)
+                    cookies.append(cookie)
+                    self.cache.add(cookie.content_link)
+            logger.debug(f"加载了已保存的数据 {len(cookies)} 条")
+        
+        return cookies
+
+    def store(self, filename, cookie):
+        """保存数据"""
+        if not cookie:
+            self.print("?")
+        elif cookie.content_link in self.cache:
+            self.print(".")
+        else:
+            with open(filename, "a", encoding="utf-8") as f:
+                f.write(cookie.to_json() + "\n")
+            self.cache.add(cookie.content_link)
+            print(cookie)
+
+    def print(self, text):
+        print(text, end="", flush=True)
+        sys.stdout.flush()
+    
+
+class MingJuCrawler(Crawler):
+    def __init__(self, base_url: str = "https://www.gushiwen.cn/mingjus/default.aspx?page={page}&tstr={category}&astr=&cstr=&xstr="):
+        super().__init__(base_url=base_url)
+        self.parser = MingJuParser(self.base_url)
+        self.saved_links = set()
+        self.data_dir = "data/mingju"
+        os.makedirs(self.data_dir, exist_ok=True)
+    
+    def crawl(self, category: str):
+        logger.info(f"开始爬取 《{category}》")
+
+        # 加载已保存的名句链接
+        filename = f"{self.data_dir}/{category}.jsonl"
+        cookies = self.load(filename)
+
         # 爬取名句
-        for page in range(start_page, end_page + 1):
-            url = f"{self.mingju_url.format(title=title, page=page)}"
+        for page in range(1, self.max_page):
+            url = self.base_url.format(category=category, page=page)
             soup = self.get_page(url)
             if not soup:
                 continue
@@ -107,135 +241,109 @@ class GushiwenCrawler:
             # 获取当前页面所有名句链接
             cookies = soup.find_all("div", class_="cont")
             for cookie in cookies:
-                content, source, content_link, source_link = self.parse_mingju(cookie)
-                if not content_link or content_link in self.saved_links:
-                    self.print_dot()
+                item = self.parser.parse_item(cookie)
+                if not item:
+                    # logger.debug(f"无法解析名句 {cookie}")
+                    self.print("?")
                     continue
-                else:
-                    self.save_mingju(title, content, source, content_link, source_link)
-                    print(f"{content}\n -- {source}\n%")
+                item.source = category
+                item.source_link = url
+                self.store(filename, item)
             print()
+
             # 获取下一页链接
             next_page = soup.find("a", class_="amore")
             if not next_page or not next_page.has_attr("href"):
                 # 如果没有下一页，结束爬取
                 logger.debug(f"当前页 {page} 无下一页")
                 break
-        logger.info(f"爬取 《{title}》 完成, 共爬取 {len(self.saved_links)} 条名句。")
+        logger.info(f"爬取 《{category}》 完成, 共爬取 {len(self.cache)} 条。")
 
-    def crawl_gushi_entry(self, url):
-        """爬取诗词详情"""
-        soup = self.get_page(url)
-        if not soup:
-            return
-        # 获取诗词内容
-        yuanwen = soup.find("div", id="sonsyuanwen")
-        if not yuanwen:
-            logger.debug(f"无法获取诗词内容 {url}")
-            return None, None, None
-        title = self.get_text(yuanwen.find("h1"))
-        author = self.get_text(yuanwen.find("p", class_="source"))
-        content = self.get_text(yuanwen.find("div", class_="contson"))
-        return title, author, content
-        
-    def save_gushi(self, book, title, author, content, content_link):
-        """保存诗词"""
-        file_link = self.get_file_link(book)
-        with open(file_link, "a", encoding="utf-8") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "title": title,
-                        "author": author,
-                        "content": content,
-                        "content_link": content_link,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-        self.saved_links.add(content_link)
-
-    def crawl_gushi(self, key: str, name: str):
-        """爬取指定页数的古诗"""
-        logger.info(f"开始爬取 《{name}》")
-        # 加载已保存的诗词链接
-        self.data_dir = "data/gushi"
+class GuShiCrawler(Crawler):
+    def __init__(self, base_url: str = "https://www.gushiwen.cn/gushi/{category}.aspx"):
+        super().__init__(base_url=base_url)
+        self.parser = GuShiParser(self.base_url)
         self.saved_links = set()
-        file_link = self.get_file_link(name)
-        if os.path.exists(file_link):
-            with open(file_link, "r", encoding="utf-8") as f:
-                for line in f:
-                    cookie = json.loads(line)
-                    self.saved_links.add(cookie["content_link"])
-            logger.debug(f"已加载已保存的诗词 {len(self.saved_links)} 条")
-        # 爬取诗词
-        url = f"{self.gushi_url.format(title=key)}"
-        soup = self.get_page(url)
-        if not soup:
-            logger.error(f"无法获取 {url}")
-            return
-
-        # 获取列表部分
-        section = soup.find("div", class_="sons")
-        # 获取所有诗词链接
-        links = section.find_all("a")
-        for link in links:
-            if not link.has_attr("href"):
-                continue
-            gushi_entry_link = urljoin(self.gushi_url, link["href"])
-            if gushi_entry_link in self.saved_links:
-                continue
-            else:
-                title, author, content = self.crawl_gushi_entry(gushi_entry_link)
-                if title and author and content:
-                    self.save_gushi(name, title, author, content, gushi_entry_link)
-                    print(f"《{title}》 -- {author}\n{content}\n%")
-                else:
-                    self.print_dot()
-                
-            print()
-        logger.info(f"爬取 《{name}》 完成, 共爬取 {len(self.saved_links)} 条诗词。")
-
-    def crawl_shiwen(self, title: str):
-        """爬取指定页数的古诗"""
-        logger.info(f"开始爬取 《{title}》")
+        self.data_dir = "data/gushi"
+        os.makedirs(self.data_dir, exist_ok=True)
+    
+    def crawl(self, category: str, key: str):
+        logger.info(f"开始爬取 《{category}》")
+        
         # 加载已保存的诗词链接
-        link = "https://www.gushiwen.cn/shiwens/default.aspx?cstr={title}"
-        data_dir = "data/shiwen"
-        os.makedirs(data_dir, exist_ok=True)
-        saved_links = set()
-        file_link = f"{data_dir}/{title}.jsonl"
-        if os.path.exists(file_link):
-            with open(file_link, "r", encoding="utf-8") as f:
-                for line in f:
-                    cookie = json.loads(line)
-                    self.saved_links.add(cookie["content_link"])
-            logger.debug(f"已加载已保存的诗词 {len(saved_links)} 条")
+        filename = f"{self.data_dir}/{category}.jsonl"
+        cookies = self.load(filename)
+
         # 爬取诗词
-        url = f"{link.format(title=title)}"
-        soup = self.get_page(url)
-        if not soup:
+        url = self.base_url.format(category=key)
+        body = self.get_page(url)
+        links = self.parser.parse_list(body)
+        if not links or len(links) == 0:
             logger.error(f"无法获取 {url}")
             return
-
-        # 获取列表部分
-        section = soup.find("div", class_="typecont")
-        # 获取所有诗词链接
-        links = section.find_all("a")
+        
         for link in links:
-            shiwen_entry_link = urljoin(url, link["href"])
-            if shiwen_entry_link in saved_links:
-                self.print_dot()
+            if link in self.cache:
+                self.print(".")
                 continue
             else:
-                item_title, author, content = self.crawl_gushi_entry(shiwen_entry_link)
-                if item_title and author and content:
-                    self.save_gushi(title, item_title, author, content, shiwen_entry_link)
-                    print(f"《{item_title}》 -- {author}\n{content}\n%")
-                
+                body = self.get_page(link)
+                item = self.parser.parse_item(body)
+                if not item:
+                    logger.debug(f"无法解析诗词 {link}")
+                    continue
+
+                item.content_link = link
+                item.source = category
+                item.source_link = url
+
+                self.store(filename, item)
             print()
-        logger.info(f"爬取 《{title}》 完成, 共爬取 {len(self.saved_links)} 条诗词。")
+
+        logger.info(f"爬取 《{category}》 完成, 共爬取 {len(self.cache)} 条。")
+
+class ShiWenCrawler(GuShiCrawler):
+    def __init__(self, base_url: str = "https://www.gushiwen.cn/shiwens/default.aspx?cstr={category}"):
+        super().__init__(base_url=base_url)
+        self.parser = ShiWenParser(self.base_url)
+        self.data_dir = "data/shiwen"
+        os.makedirs(self.data_dir, exist_ok=True)
+
+    def crawl(self, category: str):
+        """爬取诗文"""
+        logger.info(f"开始爬取 《{category}》")
+        
+        # 加载已保存的诗词链接
+        filename = f"{self.data_dir}/{category}.jsonl"
+        cookies = self.load(filename)
+
+        # 爬取诗词
+        url = self.base_url.format(category=category)
+        body = self.get_page(url)
+        links = self.parser.parse_list(body)
+        if not links or len(links) == 0:
+            logger.error(f"无法获取 {url}")
+            return
+        
+        for link in links:
+            if link in self.cache:
+                self.print(".")
+                continue
+            else:
+                body = self.get_page(link)
+                item = self.parser.parse_item(body)
+                if not item:
+                    logger.debug(f"无法解析诗词 {link}")
+                    continue
+
+                item.content_link = link
+                item.source = category
+                item.source_link = url
+
+                self.store(filename, item)
+            print()
+
+        logger.info(f"爬取 《{category}》 完成, 共爬取 {len(self.cache)} 条。")
 
 def main():
     logger.level("DEBUG")
@@ -316,16 +424,17 @@ def main():
         "近现代",
     ]
     
-    crawler = GushiwenCrawler()
-
+    mingju_crawler = MingJuCrawler()
     for title in mingju_titles:
-        crawler.crawl_mingju(title, 1, 100)
-
-    for (key, name) in gushi_titles:
-        crawler.crawl_gushi(key, name)
+        mingju_crawler.crawl(title)
     
+    gushi_crawler = GuShiCrawler()
+    for (key, name) in gushi_titles:
+        gushi_crawler.crawl(name, key)
+    
+    shiwen_crawler = ShiWenCrawler()
     for title in shiwen_title:
-        crawler.crawl_shiwen(title)
+        shiwen_crawler.crawl(title)
 
 if __name__ == "__main__":
     main()
