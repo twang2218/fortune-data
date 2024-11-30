@@ -22,7 +22,7 @@ def extract_cookie_content(cookie_path):
                 comments.append(line.lstrip('#').strip())
             else:
                 # remove color escape sequences
-                re_escape = re.compile(r'\x1b[^m]*m')
+                re_escape = re.compile(r'[\x1b\^][^m]*m')
                 line = re_escape.sub('', line)
                 content.append(line)
                 
