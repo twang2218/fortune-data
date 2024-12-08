@@ -33,6 +33,7 @@ def process_jar(jar):
     location = os.path.join("data", "load", "packaged", jar.lang)
     s = CookieDB(name=jar.name, location=location, dat_file=False)
     s.save(cookies)
+    logger.info(f"Processing '{jar.name}' completed.")
 
 
 def main():
@@ -68,7 +69,11 @@ def main():
             cookies[jar.lang] = []
         location = os.path.join("data", "transform", jar.lang)
         s = Jsonl(name=jar.name, location=location)
-        cookies[jar.lang].extend(s.load())
+        try:
+            cookies[jar.lang].extend(s.load())
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e}")
+            continue
     # Transform
     transformers = [
         FilterByRank(top=500),

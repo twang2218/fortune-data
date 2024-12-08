@@ -2,7 +2,7 @@ import os
 import sqlite3
 from typing import List
 
-from langchain.globals import set_llm_cache, get_llm_cache
+from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
 from langchain_community.chat_models import ChatTongyi
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -10,7 +10,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai.chat_models import ChatOpenAI
 from loguru import logger
-from model import Cookie, CookieList
+from model import Cookie, CookieList, Score
 from pydantic import Field, SecretStr
 
 from .transformer import Transformer
@@ -71,13 +71,22 @@ class Scorer(Transformer):
 
     def score_single(self, cookie: Cookie) -> Cookie:
         # Construct the chain
-        m = load_model(provider=self.provider, model_name=self.model_name)
+        llm = load_model(provider=self.provider, model_name=self.model_name)
         parser = PydanticOutputParser(pydantic_object=Cookie)
         chain = (
             self.prompt_template.partial(
                 format_instructions=parser.get_format_instructions()
             )
-            | m
+            | llm
+            | parser
+        )
+
+        llm_fallback = load_model(provider="openai", model_name="gpt-4o")
+        chain_fallback = (
+            self.prompt_template.partial(
+                format_instructions=parser.get_format_instructions()
+            )
+            | llm_fallback
             | parser
         )
 
@@ -89,8 +98,19 @@ class Scorer(Transformer):
                 result.score.update_overall()
             return result
         except Exception as e:
+            # logger.debug(f"prompt:\n{self.prompt_template.format(format_instructions=parser.get_format_instructions(), content=cookie.model_dump_json())}")
+            logger.warning(f"Failed to score cookie: {cookie.model_dump_json()}: {e}")
             remove_link_from_cache(cookie.link)
-            raise e
+            # run fallback model
+            logger.debug(f"Running fallback model: {llm_fallback}")
+            result = chain_fallback.invoke({"content": cookie.model_dump_json()})
+            if not result:
+                raise ValueError("result is None")
+            else:
+                result.score.update_overall()
+                logger.debug(f"fallback result: {result}")
+            return result
+
     def score(self, cookies: List[Cookie]) -> List[Cookie]:
         logger.info(
             f"LLM Model for scoring: [{self.provider}:{self.model_name}], batch_size: {self.batch_size}, cookies: {len(cookies)}"
@@ -106,6 +126,7 @@ class Scorer(Transformer):
                     logger.error(
                         f"Failed to score cookie: {cookie.model_dump_json()}: {e}"
                     )
+                    cookie.score = Score()
         else:
             for i in range(0, len(cookies), self.batch_size):
                 logger.debug(
@@ -122,7 +143,8 @@ class Scorer(Transformer):
                     logger.error(
                         f"Failed to score batch {i} to {i+self.batch_size}: {e}"
                     )
-                    continue
+                    for j in range(i, i + self.batch_size):
+                        cookies[j].score = Score()
 
         return cookies
 
@@ -162,7 +184,8 @@ def load_model(
     #     m = ChatAnthropic(model_name=model_name, timeout=60, stop=None)
     return m
 
-def remove_link_from_cache(link:str):
+
+def remove_link_from_cache(link: str):
     try:
         conn = sqlite3.connect(LANGCHAIN_DB_PATH)
         c = conn.cursor()

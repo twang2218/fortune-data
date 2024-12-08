@@ -3,20 +3,21 @@ import time
 from typing import List
 from urllib.parse import urljoin
 
-from loguru import logger
-import requests
-import requests_cache
-from requests_cache import CachedSession
 from bs4 import BeautifulSoup
+from loguru import logger
 from model import Cookie, CookieJar
 from pydantic import BaseModel, Field
+from requests_cache import CachedSession
 
 # 设置缓存，有效期为1个月
 # requests_cache.install_cache(
 #     "data/cache/crawler.db", backend="sqlite", expire_after=86400 * 30
 # )
 
-session = CachedSession("data/cache/crawler.db", backend="sqlite", expire_after=86400 * 30)
+session = CachedSession(
+    "data/cache/crawler.db", backend="sqlite", expire_after=86400 * 30
+)
+
 
 class Crawler(BaseModel):
     base_url: str = Field(default="", description="The base URL of the website.")
@@ -46,7 +47,7 @@ class Crawler(BaseModel):
             response.encoding = "utf-8"
             return BeautifulSoup(response.text, "html.parser")
         except Exception as e:
-            print(f"Error fetching {url}: {str(e)}")
+            logger.error(f"Error fetching {url}: {str(e)}")
             self.remove_link_from_cache(url)
             return None
 
@@ -65,7 +66,7 @@ class Crawler(BaseModel):
         if link and link.has_attr("href"):
             return urljoin(self.base_url, link["href"])
         return None
-    
+
     def remove_link_from_cache(self, url):
         logger.debug(f"Removing {url} from crawler cache")
         session.cache.delete(urls=[url])

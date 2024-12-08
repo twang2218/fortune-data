@@ -28,7 +28,7 @@ class MingJuCrawler(Crawler):
             for element in self.parse_list(body):
                 cookie = self.parse_item(element)
                 if not cookie:
-                    logger.debug(f"无法解析名句 {element}")
+                    logger.warning(f"无法解析名句 {element}")
                     print("?", end="", flush=True)
                     continue
                 else:
@@ -40,7 +40,7 @@ class MingJuCrawler(Crawler):
             next_page = body.find("a", class_="amore")
             if not next_page or not next_page.has_attr("href"):
                 # 如果没有下一页，结束爬取
-                logger.debug(f"当前页 {page} 无下一页")
+                logger.debug(f"当前页 {page} 无下一页，结束爬取。")
                 break
         logger.info(f"爬取 《{jar.name}》 完成, 共爬取 {len(cookies)} 条。")
         return cookies
@@ -64,7 +64,7 @@ class MingJuCrawler(Crawler):
             else:
                 return None
         except Exception as e:
-            print(f"Error parsing cookie: {str(e)}")
+            logger.error(f"Error parsing cookie: {str(e)}")
             return None
 
     def parse_list(self, element) -> List:
@@ -103,7 +103,7 @@ class GuShiCrawler(Crawler):
             link_body = self.get_page(link)
             cookie = self.parse_item(link_body)
             if not cookie:
-                logger.debug(f"无法解析诗词 {link}")
+                logger.warning(f"无法解析诗词 {link}")
                 self.remove_link_from_cache(link)
                 print("?", end="", flush=True)
             else:
@@ -133,7 +133,7 @@ class GuShiCrawler(Crawler):
                 cookie.title = f"《{cookie.title}》"
             return cookie
         except Exception as e:
-            print(f"Error parsing cookie: {str(e)}")
+            logger.error(f"Error parsing cookie: {str(e)}")
             return None
 
     def parse_list(self, element) -> List:
@@ -175,10 +175,10 @@ class ShiWenCrawler(GuShiCrawler):
             link_body = self.get_page(link)
             cookie = self.parse_item(link_body)
             if not cookie:
-                logger.debug(f"无法解析诗词 {link}")
+                logger.warning(f"无法解析诗词 {link}")
                 self.remove_link_from_cache(link)
                 print("?", end="", flush=True)
-                continue
+                # continue
             else:
                 cookie.link = link
                 cookie.source = jar.name

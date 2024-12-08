@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import List
 
 from model import Cookie
@@ -34,10 +35,23 @@ class FilterByRank(Transformer):
 
     def transform(self, cookies: List[Cookie]) -> List[Cookie]:
         # sort cookies by overall score
-        cookies.sort(key=lambda cookie: cookie.score.overall, reverse=True)
+        cookies.sort(
+            key=lambda cookie: cookie.score.overall
+            if cookie.score and isinstance(cookie.score.overall, Number)
+            else 0,
+            reverse=True,
+        )
         return cookies[: self.top]
 
+
 class Sorter(Transformer):
+    reversed: bool = Field(default=True, description="Sort in reversed order.")
+
     def transform(self, cookies: List[Cookie]) -> List[Cookie]:
-        cookies.sort(key=lambda cookie: cookie.score.overall, reverse=True)
+        cookies.sort(
+            key=lambda cookie: cookie.score.overall
+            if cookie.score and isinstance(cookie.score.overall, Number)
+            else 0,
+            reverse=self.reversed,
+        )
         return cookies
