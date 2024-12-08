@@ -1,27 +1,30 @@
-from typing import Generic, List, TypeVar
+import os
+from typing import List
 
-from pydantic import BaseModel
+from model import Cookie
 
 from .loader import Loader
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class Jsonl(Loader[T], Generic[T]):
-    def load(self) -> List[T]:
+class Jsonl(Loader):
+    def load(self) -> List[Cookie]:
         results = []
         filename = self.get_filename() + ".jsonl"
+
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
                 # ignore empty lines and comments
                 line = line.strip()
                 if not line or line.startswith("//"):
                     continue
-                results.append(T.model_validate_json(line))
+
+                results.append(Cookie.model_validate_json(line))
         return results
 
-    def save(self, data: List[T]):
+    def save(self, data: List[Cookie]):
+        # make sure the directory exists
         filename = self.get_filename() + ".jsonl"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, "w", encoding="utf-8") as f:
             for item in data:
                 f.write(item.model_dump_json() + "\n")

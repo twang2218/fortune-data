@@ -1,10 +1,38 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
+from loguru import logger
 from extract import Extractor
 from load import CookieDB, Jsonl
-from model import Cookie, CookieJar
-from transform import Scorer, FilterByLength, FilterByScore
+from model import CookieJar
+from transform import FilterByLength, FilterByRank, Scorer, Sorter
+
+
+def process_jar(jar):
+    # Extract
+    cookies = Extractor.extract(jar)
+    location = os.path.join("data", "extract", jar.lang)
+    s = Jsonl(name=jar.name, location=location)
+    s.save(cookies)
+
+    # Transform
+    transformers = [
+        FilterByLength(min_length=5, max_length=300),
+        Scorer(provider="tongyi", model_name="qwen-plus", batch_size=1),
+        # FilterByScore(score=5.0),
+        Sorter(),
+    ]
+    for transformer in transformers:
+        cookies = transformer.transform(cookies)
+    location = os.path.join("data", "transform", jar.lang)
+    s = Jsonl(name=jar.name, location=location)
+    s.save(cookies)
+
+    # Load
+    location = os.path.join("data", "load", "packaged", jar.lang)
+    s = CookieDB(name=jar.name, location=location, dat_file=False)
+    s.save(cookies)
 
 
 def main():
@@ -29,46 +57,28 @@ def main():
             if jar.name:
                 jars.append(jar)
 
-    location_extract = "data/extract"
-    location_transform = "data/transform"
-    location_load = "data/load"
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        executor.map(process_jar, jars)
 
-    os.makedirs(location_extract, exist_ok=True)
-    os.makedirs(location_transform, exist_ok=True)
-    os.makedirs(location_load, exist_ok=True)
-
+    # embedded
+    logger.info("Processing embedded cookies")
+    cookies = {}
     for jar in jars:
-        # Extract
-        cookies = Extractor.extract(jar)
-        s = Jsonl[Cookie](name=jar.name, location=location_extract)
-        s.save(cookies)
-
-        # Transform
-        transformers = [
-            FilterByLength(min_length=5, max_length=300),
-            Scorer(batch_size=1),
-            FilterByScore(score=5.0),
-            # FilterByRank(top=100),
-        ]
+        if jar.lang not in cookies:
+            cookies[jar.lang] = []
+        location = os.path.join("data", "transform", jar.lang)
+        s = Jsonl(name=jar.name, location=location)
+        cookies[jar.lang].extend(s.load())
+    # Transform
+    transformers = [
+        FilterByRank(top=500),
+    ]
+    for lang, lang_cookies in cookies.items():
         for transformer in transformers:
-            cookies = transformer.transform(cookies)
-        s = Jsonl[Cookie](name=jar.name, location=location_transform)
-        s.save(cookies)
-
-        # # Transform - Scoring
-        # scorer = Scorer()
-        # cookies = scorer.score(cookies)
-        # s = Jsonl[Cookie](name=jar.name, location=location_transform)
-        # s.save(cookies)
-
-        # Transform - Filtering
-        ## Sort cookies by overall score
-        ## Select top xxx cookies
-        ## Filter out cookie content that is too long
-
-        # Load
-        s = CookieDB(name=jar.name, location=location_load)
-        s.save(cookies)
+            lang_cookies = transformer.transform(lang_cookies)
+        location = os.path.join("data", "load", "embedded", lang)
+        s = CookieDB(name=lang, location=location, dat_file=True)
+        s.save(lang_cookies)
 
 
 if __name__ == "__main__":

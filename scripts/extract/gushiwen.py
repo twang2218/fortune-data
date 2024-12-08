@@ -35,7 +35,7 @@ class MingJuCrawler(Crawler):
                     cookie.source = jar.name
                     cookies.append(cookie)
                     print(".", end="", flush=True)
-            print()
+            # print()
             # 获取下一页链接
             next_page = body.find("a", class_="amore")
             if not next_page or not next_page.has_attr("href"):
@@ -58,6 +58,8 @@ class MingJuCrawler(Crawler):
                     source="",
                     link=self.get_link(links[0]),
                 )
+                if cookie.title and "《" not in cookie.title:
+                    cookie.title = f"《{cookie.title}》"
                 return cookie
             else:
                 return None
@@ -102,16 +104,16 @@ class GuShiCrawler(Crawler):
             cookie = self.parse_item(link_body)
             if not cookie:
                 logger.debug(f"无法解析诗词 {link}")
+                self.remove_link_from_cache(link)
                 print("?", end="", flush=True)
-                continue
             else:
                 cookie.link = link
                 cookie.source = jar.name
                 cookies.append(cookie)
                 print(".", end="", flush=True)
-            if len(cookies) % 50 == 0:
-                print()
-        print()
+        #     if len(cookies) % 50 == 0:
+        #         print()
+        # print()
 
         logger.info(f"爬取 《{jar.name}》 完成, 共爬取 {len(cookies)} 条。")
         return cookies
@@ -127,6 +129,8 @@ class GuShiCrawler(Crawler):
                 source="",
                 link="",
             )
+            if cookie.title and "《" not in cookie.title:
+                cookie.title = f"《{cookie.title}》"
             return cookie
         except Exception as e:
             print(f"Error parsing cookie: {str(e)}")
@@ -172,6 +176,7 @@ class ShiWenCrawler(GuShiCrawler):
             cookie = self.parse_item(link_body)
             if not cookie:
                 logger.debug(f"无法解析诗词 {link}")
+                self.remove_link_from_cache(link)
                 print("?", end="", flush=True)
                 continue
             else:
@@ -179,9 +184,9 @@ class ShiWenCrawler(GuShiCrawler):
                 cookie.source = jar.name
                 cookies.append(cookie)
                 print(".", end="", flush=True)
-            if len(cookies) % 50 == 0:
-                print()
-        print()
+        #     if len(cookies) % 50 == 0:
+        #         print()
+        # print()
 
         logger.info(f"爬取 《{jar.name}》 完成, 共爬取 {len(cookies)} 条。")
         return cookies

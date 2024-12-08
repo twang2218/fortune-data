@@ -1,4 +1,5 @@
 from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -68,11 +69,21 @@ class Cookie(BaseModel):
         default="",
         description="source of the content, e.g. poem title, book name, author, etc.",
     )
+    # extras: Optional[Dict[str, str]] = Field(default=None, description="extra information")
     link: str = Field(default="", description="link to the content")
     score: Score = Field(default=None, description="scores of the content")
 
     def __str__(self):
-        return f"{self.content} -- {self.source}"
+        source = self.title if self.title else self.source
+        source = f"{source}  {self.author}" if self.author else source
+
+        if self.author:
+            return f"{source}\n{self.content}"
+        else:
+            if "\n" in self.content or len(self.content) > 20:
+                return f"{self.content}\n  -- {source}"
+            else:
+                return f"{self.content}  -- {source}"
 
 
 class CookieList(BaseModel):

@@ -36,3 +36,8 @@ class FilterByRank(Transformer):
         # sort cookies by overall score
         cookies.sort(key=lambda cookie: cookie.score.overall, reverse=True)
         return cookies[: self.top]
+
+class Sorter(Transformer):
+    def transform(self, cookies: List[Cookie]) -> List[Cookie]:
+        cookies.sort(key=lambda cookie: cookie.score.overall, reverse=True)
+        return cookies

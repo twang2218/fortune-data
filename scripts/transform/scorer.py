@@ -1,7 +1,8 @@
 import os
+import sqlite3
 from typing import List
 
-from langchain.globals import set_llm_cache
+from langchain.globals import set_llm_cache, get_llm_cache
 from langchain_community.cache import SQLiteCache
 from langchain_community.chat_models import ChatTongyi
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -14,7 +15,8 @@ from pydantic import Field, SecretStr
 
 from .transformer import Transformer
 
-set_llm_cache(SQLiteCache(database_path="data/cache/langchain.db"))
+LANGCHAIN_DB_PATH = "data/cache/langchain.db"
+set_llm_cache(SQLiteCache(database_path=LANGCHAIN_DB_PATH))
 
 
 class Scorer(Transformer):
@@ -79,13 +81,16 @@ class Scorer(Transformer):
             | parser
         )
 
-        result = chain.invoke({"content": cookie.model_dump_json()})
-        if not result:
-            raise ValueError(f"Failed to score cookie: {cookie.model_dump_json()}")
-        else:
-            result.score.update_overall()
-        return result
-
+        try:
+            result = chain.invoke({"content": cookie.model_dump_json()})
+            if not result:
+                raise ValueError("result is None")
+            else:
+                result.score.update_overall()
+            return result
+        except Exception as e:
+            remove_link_from_cache(cookie.link)
+            raise e
     def score(self, cookies: List[Cookie]) -> List[Cookie]:
         logger.info(
             f"LLM Model for scoring: [{self.provider}:{self.model_name}], batch_size: {self.batch_size}, cookies: {len(cookies)}"
@@ -95,8 +100,8 @@ class Scorer(Transformer):
                 try:
                     cookie.score = self.score_single(cookie).score
                     print(".", end="", flush=True)
-                    if (i + 1) % 50 == 0:
-                        print()
+                    # if (i + 1) % 50 == 0:
+                    #     print()
                 except Exception as e:
                     logger.error(
                         f"Failed to score cookie: {cookie.model_dump_json()}: {e}"
@@ -111,7 +116,8 @@ class Scorer(Transformer):
                     batch_results = self.score_batch(batch_cookies)
                     for j, cookie in enumerate(batch_results.cookies):
                         cookies[i + j].score = cookie.score
-                    print("." * self.batch_size)
+                        print(".", end="", flush=True)
+                    # print("." * self.batch_size)
                 except Exception as e:
                     logger.error(
                         f"Failed to score batch {i} to {i+self.batch_size}: {e}"
@@ -155,3 +161,18 @@ def load_model(
     # elif provider == "anthropic":
     #     m = ChatAnthropic(model_name=model_name, timeout=60, stop=None)
     return m
+
+def remove_link_from_cache(link:str):
+    try:
+        conn = sqlite3.connect(LANGCHAIN_DB_PATH)
+        c = conn.cursor()
+        sql = "DELETE FROM full_llm_cache WHERE prompt LIKE ?"
+        c.execute(sql, (f"%{link}%",))
+        delete_count = c.rowcount
+        conn.commit()
+        logger.debug(f"Removing {delete_count} records for {link} from langchain cache")
+    except Exception as e:
+        logger.error(f"Error removing {link} from langchain cache: {str(e)}")
+    finally:
+        if conn:
+            conn.close()

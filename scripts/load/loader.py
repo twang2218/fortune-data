@@ -1,19 +1,18 @@
-from typing import Generic, List, TypeVar
+from typing import List
 
+from model import Cookie
 from pydantic import BaseModel, Field
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class Loader(BaseModel, Generic[T]):
+class Loader(BaseModel):
     name: str = Field(default="", description="The name of the loader.")
     location: str = Field(default="", description="The location of the loader.")
 
     def get_filename(self) -> str:
         return f"{self.location}/{self.name}"
 
-    def load(self) -> List[T]:
+    def load(self) -> List[Cookie]:
         raise NotImplementedError
 
-    def save(self, data: List[T]):
+    def save(self, data: List[Cookie]):
         raise NotImplementedError
