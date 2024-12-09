@@ -5,6 +5,5 @@ from pydantic import BaseModel
 
 
 class Transformer(BaseModel):
-    @staticmethod
     def transform(self, cookies: List[Cookie]) -> List[Cookie]:
         raise NotImplementedError

@@ -110,3 +110,7 @@ class CookieJar(BaseModel):
         default="",
         description="The extractor of the task.",
     )
+    model_name: str = Field(
+        default="tongyi:qwen-turbo-latest",
+        description="The language model name.",
+    )

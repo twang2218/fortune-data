@@ -54,7 +54,7 @@ class Crawler(BaseModel):
         resp = self.get_response(url)
         if not resp:
             return None
-        return BeautifulSoup(resp.text, "html.parser")
+        return BeautifulSoup(resp.text, "html5lib")
 
     def get_json(self, url) -> dict:
         """获取 JSON 数据"""
@@ -111,5 +111,9 @@ class Crawler(BaseModel):
                 from .xinhua import XinhuaCrawler
 
                 return XinhuaCrawler.extract(jar)
+            case "crawler", "wikiquote":
+                from .wikiquote import WikiQuoteCrawler
+
+                return WikiQuoteCrawler.extract(jar)
             case _:
                 raise NotImplementedError

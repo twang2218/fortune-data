@@ -1,22 +1,11 @@
-import os
-import sqlite3
 from typing import Any, List, Type
 
-from langchain.globals import set_llm_cache
-from langchain_community.cache import SQLiteCache
-from langchain_community.chat_models import ChatTongyi
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai.chat_models import ChatOpenAI
 from loguru import logger
 from model import Cookie, Score
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
+from utils import get_llm_chain, get_structured_prompt, remove_from_cache
 
 from .transformer import Transformer
-
-LANGCHAIN_DB_PATH = "data/cache/langchain.db"
-set_llm_cache(SQLiteCache(database_path=LANGCHAIN_DB_PATH))
 
 
 class Scorer(Transformer):
@@ -28,22 +17,9 @@ class Scorer(Transformer):
         default="openai:gpt-4o",
         description="The fallback language model provider. format: 'provider:model_name', e.g. 'openai:gpt-4o'",
     )
-    prompt_template: ChatPromptTemplate = Field(
-        default=ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """
-        Please evaluate the following content across multiple dimensions, and provide a score for each dimension.
-        note: please use the same language of 'content' to explain.
-        Return only the JSON format result. The format should be as follows:
-        {format_instructions}
-        """,
-                ),
-                ("user", "{content}"),
-            ]
-        ),
-        description="The prompt template for the language model.",
+    prompt: str = Field(
+        default="Please evaluate the following content across multiple dimensions, and provide a score for each dimension. note: please use the same language of 'content' to explain.",
+        description="The prompt for the language model.",
     )
     batch_size: int = Field(
         default=10, description="The batch size for processing the content."
@@ -61,16 +37,10 @@ class Scorer(Transformer):
     def get_chain(
         self, model_name: str = "openai:gpt-4o", cls: Type[BaseModel] = Cookie
     ):
-        llm = load_model(model_name=model_name)
-        parser = PydanticOutputParser(pydantic_object=cls)
-        chain = (
-            self.prompt_template.partial(
-                format_instructions=parser.get_format_instructions()
-            )
-            | llm
-            | parser
+        prompt_template = get_structured_prompt(self.prompt)
+        return get_llm_chain(
+            prompt_template=prompt_template, model_name=model_name, cls=Cookie
         )
-        return chain
 
     def score(self, cookies: List[Cookie]) -> List[Cookie]:
         for i in range(0, len(cookies), self.batch_size):
@@ -82,10 +52,15 @@ class Scorer(Transformer):
             # Run normal chain
             results = self.chain.batch(batch_inputs, return_exceptions=True)
             for j, result in enumerate(results):
-                if isinstance(result, Exception):
+                # had exception or didn't generate a score
+                if isinstance(result, Exception) or not result.score:
                     logger.warning(
                         f"Failed to score the cookie on chain '{self.model_name}': cookie: {batch_cookies[j].model_dump_json()} => {result}"
                     )
+                    err_msg = str(result) if isinstance(result, Exception) else ""
+                    if "DataInspectionFailed" not in err_msg:
+                        remove_from_cache(batch_cookies[j].content)
+                    # fallback
                     try:
                         # fallback to chain_fallback
                         result = self.chain_fallback.invoke(batch_inputs[j])
@@ -97,63 +72,20 @@ class Scorer(Transformer):
                         logger.error(
                             f"Failed on fallback chain '{self.model_name_fallback}': {e}"
                         )
+                        remove_from_cache(batch_cookies[j].content)
                         result = Cookie()
                         result.score = Score()
 
-                if result:
+                if result and result.score:
                     result.score.update_overall()
                     cookies[i + j].score = result.score
                     print(".", end="", flush=True)
                     # logger.debug(f"cookie: {batch_cookies[j]} => {result.score.model_dump_json()}")
+                else:
+                    logger.warning(
+                        f"Fail to have a score for cookie: {batch_cookies[j]} => {result.model_dump_json()}"
+                    )
         return cookies
 
     def transform(self, cookies: List[Cookie]) -> List[Cookie]:
         return self.score(cookies)
-
-
-def load_model(model_name: str = "openai:gpt-4o") -> BaseChatModel:
-    provider, model_name = model_name.split(":")
-    # logger.info(f"model: {provider} : {model_name}")
-    m: BaseChatModel
-    if provider == "openai":
-        # extra_kwargs = self.__get_extra_kwargs()
-        # model_name = "gpt-4o-mini"
-        m = ChatOpenAI(model=model_name)
-    elif provider == "tongyi":
-        import dashscope  # type: ignore # noqa: F401
-
-        # model_name = "qwen-plus"
-        m = ChatTongyi(model=model_name, api_key=None)
-    elif provider == "moonshot":
-        m = ChatOpenAI(
-            model=model_name,
-            api_key=SecretStr(os.environ.get("MOONSHOT_API_KEY") or ""),
-            base_url="https://api.moonshot.cn/v1",
-        )
-        # https://github.com/langchain-ai/langchain/issues/27058
-        # m = MoonshotChat(model=model_name)
-    elif provider == "deepseek":
-        m = ChatOpenAI(
-            model=model_name,
-            api_key=SecretStr(os.environ.get("DEEPSEEK_API_KEY") or ""),
-            base_url="https://api.deepseek.com",
-        )
-    # elif provider == "anthropic":
-    #     m = ChatAnthropic(model_name=model_name, timeout=60, stop=None)
-    return m
-
-
-def remove_link_from_cache(link: str):
-    try:
-        conn = sqlite3.connect(LANGCHAIN_DB_PATH)
-        c = conn.cursor()
-        sql = "DELETE FROM full_llm_cache WHERE prompt LIKE ?"
-        c.execute(sql, (f"%{link}%",))
-        delete_count = c.rowcount
-        conn.commit()
-        logger.debug(f"Removing {delete_count} records for {link} from langchain cache")
-    except Exception as e:
-        logger.error(f"Error removing {link} from langchain cache: {str(e)}")
-    finally:
-        if conn:
-            conn.close()

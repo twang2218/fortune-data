@@ -73,17 +73,15 @@
   * [x] 近现代诗词
   * [x] 诗文
   * [x] 对联
-* [ ] 名人名言
-  * [ ] 巴金
-  * [ ] 鲁迅
-  * [ ] 老舍
-  * [ ] 冰心
-  * [ ] 茅盾
-  * [ ] 朱自清
-  * [ ] 郭沫若
-  * [ ] 钱钟书
+* [x] 名人名言
+  * [x] 鲁迅
+  * [x] 老舍
+  * [x] 朱自清
+  * [x] 毛泽东
+  * [x] 孙文
 
 ## Resources
 
 * [x] [古诗文网](https://www.gushiwen.cn/)
-* [x] [中华新华字典数据库](https://github.com/pwxcoo/chinese-xinhua)* [ ] [维基语录](https://zh.wikiquote.org/wiki/%E9%A6%96%E9%A1%B5)
+* [x] [中华新华字典数据库](https://github.com/pwxcoo/chinese-xinhua)
+* [x] [维基语录](https://zh.wikiquote.org/wiki/%E9%A6%96%E9%A1%B5)
