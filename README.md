@@ -1,6 +1,9 @@
+# Cookie 分为两级
 
+## 第一级，嵌入 Cookie
 
-### zh
+这一级对每种语言优选的少量(500) Cookie，内容将被嵌入到二进制可执行文件中去，作为数据文件缺失时的备用方案。优选将使用LLM进行打分，按照分数从高到低排序，选取前500个。
 
-- [Debian fortunes-zh](https://salsa.debian.org/chinese-team/fortunes-zh.git)
-- [Chinese Fortune Cookie](https://code.google.com/archive/p/chinese-fortune/source/default/source)
+## 第二级，包内 Cookie
+
+这一级则是比较完整的 Cookie，其内容将被打包分发，作为 fortune 的主要数据文件，尽量包含尽可能多的语言。是否优选待定，如果优选可能会以文件为单位进行选择。

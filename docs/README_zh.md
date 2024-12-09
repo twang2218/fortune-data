@@ -1,5 +1,5 @@
 
-中文 Cookie 采集
+中文 Cookie 收集
 
 ## 内容
 
