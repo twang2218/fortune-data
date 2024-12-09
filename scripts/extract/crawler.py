@@ -115,5 +115,9 @@ class Crawler(BaseModel):
                 from .wikiquote import WikiQuoteCrawler
 
                 return WikiQuoteCrawler.extract(jar)
+            case "crawler", "fortune_mod":
+                from .fortune_mod import ForturnModCrawler
+
+                return ForturnModCrawler.extract(jar)
             case _:
                 raise NotImplementedError

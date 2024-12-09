@@ -1,74 +1,102 @@
 
-{"lang": "zh_CN", "name": "论语", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "大学", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "孟子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "中庸", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "荀子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "易传", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "老子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "庄子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "韩非子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "鬼谷子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "管子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "墨子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "商君书", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "淮南子", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "三十六计", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "孙子兵法", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "左传", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "尚书", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "吕氏春秋", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "战国策", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "史记", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "汉书", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "后汉书", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "晋书", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "资治通鉴", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "贞观政要", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "了凡四训", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "弟子规", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "朱子家训", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "孔子家语", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "颜氏家训", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "三字经", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "格言联璧", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "小窗幽记", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "幼学琼林", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "随园诗话", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "菜根谭", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "增广贤文", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "围炉夜话", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "醒世恒言", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "警世通言", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "红楼梦", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "西游记", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "水浒传", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "三国演义", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "儒林外史", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "镜花缘", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "济公全传", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "官场现形记", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "诗经", "extractor": "crawler.gushiwen.mingju.tstr"}
-{"lang": "zh_CN", "name": "文心雕龙", "extractor": "crawler.gushiwen.mingju.tstr"}
+{"lang": "zh_CN", "name": "论语", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "大学", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "孟子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "中庸", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "荀子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "易传", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "老子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "庄子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "韩非子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "鬼谷子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "管子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "墨子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "商君书", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "淮南子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "三十六计", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "孙子兵法", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "左传", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "尚书", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "吕氏春秋", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "战国策", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "史记", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "汉书", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "后汉书", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "晋书", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "资治通鉴", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "贞观政要", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "了凡四训", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "弟子规", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "朱子家训", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "孔子家语", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "颜氏家训", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "三字经", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "格言联璧", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "小窗幽记", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "幼学琼林", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "随园诗话", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "菜根谭", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "增广贤文", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "围炉夜话", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "醒世恒言", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "警世通言", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "红楼梦", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "西游记", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "水浒传", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "三国演义", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "儒林外史", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "镜花缘", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "济公全传", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "官场现形记", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "诗经", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "文心雕龙", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
 
-{"lang": "zh_CN", "name": "谚语", "extractor": "crawler.gushiwen.mingju.xstr"}
-{"lang": "zh_CN", "name": "对联", "extractor": "crawler.gushiwen.mingju.xstr"}
-{"lang": "zh_CN", "name": "诗文", "extractor": "crawler.gushiwen.mingju.xstr"}
+{"lang": "zh_CN", "name": "谚语", "extractor": "crawler.gushiwen.mingju.xstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "对联", "extractor": "crawler.gushiwen.mingju.xstr", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "诗文", "extractor": "crawler.gushiwen.mingju.xstr", "model_name": "tongyi:qwen-turbo-latest"}
 
-{"lang": "zh_CN", "name": "唐诗三百首", "extractor": "crawler.gushiwen.gushi.tangshi"}
-{"lang": "zh_CN", "name": "古诗三百首", "extractor": "crawler.gushiwen.gushi.sanbai"}
-{"lang": "zh_CN", "name": "宋词三百首", "extractor": "crawler.gushiwen.gushi.songsan"}
-{"lang": "zh_CN", "name": "楚辞", "extractor": "crawler.gushiwen.gushi.chuci"}
-{"lang": "zh_CN", "name": "诗经", "extractor": "crawler.gushiwen.gushi.shijing"}
-{"lang": "zh_CN", "name": "乐府诗集", "extractor": "crawler.gushiwen.gushi.yuefu"}
+{"lang": "zh_CN", "name": "唐诗三百首", "extractor": "crawler.gushiwen.gushi.tangshi", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "古诗三百首", "extractor": "crawler.gushiwen.gushi.sanbai", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "宋词三百首", "extractor": "crawler.gushiwen.gushi.songsan", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "楚辞", "extractor": "crawler.gushiwen.gushi.chuci", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "诗经", "extractor": "crawler.gushiwen.gushi.shijing", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "乐府诗集", "extractor": "crawler.gushiwen.gushi.yuefu", "model_name": "tongyi:qwen-turbo-latest"}
 
-{"lang": "zh_CN", "name": "近现代", "extractor": "crawler.gushiwen.shiwen.cstr"}
+{"lang": "zh_CN", "name": "近现代", "extractor": "crawler.gushiwen.shiwen.cstr", "model_name": "tongyi:qwen-turbo-latest"}
 
-// {"lang": "zh_CN", "name": "歇后语", "extractor": "crawler.xinhua.xiehouyu"}
-{"lang": "zh_CN", "name": "成语", "extractor": "crawler.xinhua.idiom"}
+// {"lang": "zh_CN", "name": "歇后语", "extractor": "crawler.xinhua.xiehouyu", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "成语", "extractor": "crawler.xinhua.idiom", "model_name": "tongyi:qwen-turbo-latest"}
 
-{"lang": "zh_CN", "name": "鲁迅", "extractor": "crawler.wikiquote"}
-{"lang": "zh_CN", "name": "老舍", "extractor": "crawler.wikiquote"}
-{"lang": "zh_CN", "name": "朱自清", "extractor": "crawler.wikiquote"}
+{"lang": "zh_CN", "name": "鲁迅", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "老舍", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "朱自清", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
 {"lang": "zh_CN", "name": "毛泽东", "extractor": "crawler.wikiquote", "model_name": "openai:gpt-4o"}
-{"lang": "zh_CN", "name": "孙文", "extractor": "crawler.wikiquote"}
+{"lang": "zh_CN", "name": "孙文", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
+
+// en
+
+{"lang": "en", "name": "art", "extractor": "crawler.fortune_mod.art", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "computers", "extractor": "crawler.fortune_mod.computers", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "cookie", "extractor": "crawler.fortune_mod.cookie", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "education", "extractor": "crawler.fortune_mod.education", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "ethnic", "extractor": "crawler.fortune_mod.ethnic", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "food", "extractor": "crawler.fortune_mod.food", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "fortunes", "extractor": "crawler.fortune_mod.fortunes", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "humorists", "extractor": "crawler.fortune_mod.humorists", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "kids", "extractor": "crawler.fortune_mod.kids", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "law", "extractor": "crawler.fortune_mod.law", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "literature", "extractor": "crawler.fortune_mod.literature", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "love", "extractor": "crawler.fortune_mod.love", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "magic", "extractor": "crawler.fortune_mod.magic", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "medicine", "extractor": "crawler.fortune_mod.medicine", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "men-women", "extractor": "crawler.fortune_mod.men-women", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "news", "extractor": "crawler.fortune_mod.news", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "people", "extractor": "crawler.fortune_mod.people", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "pets", "extractor": "crawler.fortune_mod.pets", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "songs-poems", "extractor": "crawler.fortune_mod.songs-poems", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "riddles", "extractor": "crawler.fortune_mod.riddles", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "sports", "extractor": "crawler.fortune_mod.sports", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "startrek", "extractor": "crawler.fortune_mod.startrek", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "tao", "extractor": "crawler.fortune_mod.tao", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "wisdom", "extractor": "crawler.fortune_mod.wisdom", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "work", "extractor": "crawler.fortune_mod.work", "model_name": "openai:gpt-4o-mini"}

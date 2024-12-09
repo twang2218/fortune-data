@@ -57,6 +57,7 @@ def main():
     parser.add_argument(
         "input_path",
         type=str,
+        nargs="?",
         default="tasks.jsonl",
         help="Path to the input JSON file.",
     )

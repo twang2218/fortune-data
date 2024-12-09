@@ -76,14 +76,18 @@ class Cookie(BaseModel):
     def __str__(self):
         source = self.title if self.title else self.source
         source = f"{source}  {self.author}" if self.author else source
+        source = source.strip()
 
         if self.author:
             return f"{source}\n{self.content}"
         else:
-            if "\n" in self.content or len(self.content) > 20:
-                return f"{self.content}\n  -- {source}"
+            if source:
+                if "\n" in self.content or len(self.content) > 20:
+                    return f"{self.content}\n\t\t-- {source}"
+                else:
+                    return f"{self.content}  -- {source}"
             else:
-                return f"{self.content}  -- {source}"
+                return self.content
 
 
 class CookieList(BaseModel):
