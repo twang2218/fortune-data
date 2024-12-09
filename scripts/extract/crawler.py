@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from model import Cookie, CookieJar
 from pydantic import BaseModel, Field
-from requests_cache import CachedSession
+from requests_cache import AnyResponse, CachedSession
 
 # 设置缓存，有效期为1个月
 # requests_cache.install_cache(
@@ -34,24 +34,43 @@ class Crawler(BaseModel):
         description="The headers to be used in requests.",
     )
 
-    def get_page(self, url) -> BeautifulSoup:
-        """获取页面内容并返回 BeautifulSoup 对象"""
+    def get_response(self, url) -> AnyResponse:
+        """获取页面 Response 对象"""
         try:
             # 对于已经缓存的请求，不再延迟；对于新请求，随机延迟一段时间
-            # if not requests_cache.get_cache().contains(url=url):
             if not session.cache.contains(url=url):
                 time.sleep(random.uniform(self.interval / 3, self.interval))
-            # response = requests.get(url, headers=self.headers)
             response = session.get(url, headers=self.headers)
             response.raise_for_status()
             response.encoding = "utf-8"
-            return BeautifulSoup(response.text, "html.parser")
+            return response
         except Exception as e:
-            logger.error(f"Error fetching {url}: {str(e)}")
+            logger.error(f"Crawler.get_response(): Error fetching {url}: {str(e)}")
             self.remove_link_from_cache(url)
             return None
 
-    def get_text(self, element) -> str:
+    def get_page(self, url) -> BeautifulSoup:
+        """获取页面内容并返回 BeautifulSoup 对象"""
+        resp = self.get_response(url)
+        if not resp:
+            return None
+        return BeautifulSoup(resp.text, "html.parser")
+
+    def get_json(self, url) -> dict:
+        """获取 JSON 数据"""
+        resp = self.get_response(url)
+        if not resp:
+            return None
+        return resp.json()
+
+    def get_raw_text(self, url) -> str:
+        """获取页面内容并返回文本"""
+        resp = self.get_response(url)
+        if not resp:
+            return None
+        return resp.text
+
+    def get_content(self, element) -> str:
         """获取文本内容"""
         if not element:
             return None
@@ -82,10 +101,15 @@ class Crawler(BaseModel):
 
     @staticmethod
     def extract(jar: CookieJar) -> List[Cookie]:
-        match jar.extractor.split("."):
-            case "crawler", "gushiwen", _, _:
+        parts = jar.extractor.split(".")
+        match parts[0], parts[1]:
+            case "crawler", "gushiwen":
                 from .gushiwen import GushiwenCrawler
 
                 return GushiwenCrawler.extract(jar)
+            case "crawler", "xinhua":
+                from .xinhua import XinhuaCrawler
+
+                return XinhuaCrawler.extract(jar)
             case _:
                 raise NotImplementedError

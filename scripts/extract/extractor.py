@@ -8,8 +8,9 @@ from .crawler import Crawler
 class Extractor(BaseModel):
     @staticmethod
     def extract(jar: CookieJar) -> List[Cookie]:
-        match jar.extractor.split("."):
-            case "crawler", _, _, _:
+        parts = jar.extractor.split(".")
+        match parts[0]:
+            case "crawler":
                 return Crawler.extract(jar)
             case _:
                 raise NotImplementedError

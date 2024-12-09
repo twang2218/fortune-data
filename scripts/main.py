@@ -2,38 +2,44 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
-from loguru import logger
 from extract import Extractor
 from load import CookieDB, Jsonl
+from loguru import logger
 from model import CookieJar
-from transform import FilterByLength, FilterByRank, Scorer, Sorter
+from transform import FilterByLength, FilterByRank, FilterByScore, Scorer
 
 
 def process_jar(jar):
-    # Extract
-    cookies = Extractor.extract(jar)
-    location = os.path.join("data", "extract", jar.lang)
-    s = Jsonl(name=jar.name, location=location)
-    s.save(cookies)
+    try:
+        # Extract
+        cookies = Extractor.extract(jar)
+        location = os.path.join("data", "extract", jar.lang)
+        s = Jsonl(name=jar.name, location=location)
+        s.save(cookies)
 
-    # Transform
-    transformers = [
-        FilterByLength(min_length=5, max_length=300),
-        Scorer(provider="tongyi", model_name="qwen-plus", batch_size=1),
-        # FilterByScore(score=5.0),
-        Sorter(),
-    ]
-    for transformer in transformers:
-        cookies = transformer.transform(cookies)
-    location = os.path.join("data", "transform", jar.lang)
-    s = Jsonl(name=jar.name, location=location)
-    s.save(cookies)
+        # Transform
+        batch_size = 50
+        model_name = "tongyi:qwen-turbo-latest"
+        transformers = [
+            FilterByLength(min_length=5, max_length=300),
+            Scorer(model_name=model_name, batch_size=batch_size),
+            FilterByScore(score=6.0),
+            # Sorter(),
+            FilterByRank(top=500),
+        ]
+        for transformer in transformers:
+            cookies = transformer.transform(cookies)
+        location = os.path.join("data", "transform", jar.lang)
+        s = Jsonl(name=jar.name, location=location)
+        s.save(cookies)
 
-    # Load
-    location = os.path.join("data", "load", "packaged", jar.lang)
-    s = CookieDB(name=jar.name, location=location, dat_file=False)
-    s.save(cookies)
-    logger.info(f"Processing '{jar.name}' completed.")
+        # Load
+        location = os.path.join("data", "load", "packaged", jar.lang)
+        s = CookieDB(name=jar.name, location=location, dat_file=False)
+        s.save(cookies)
+        logger.info(f"Processing '{jar.name}' completed.")
+    except Exception as e:
+        logger.error(f"Processing '{jar.name}' failed: {e}")
 
 
 def main():
@@ -53,6 +59,7 @@ def main():
         for line in f.readlines():
             line = line.strip()
             if not line or line.startswith("//"):
+                # ignore empty lines and comments
                 continue
             jar = CookieJar.model_validate_json(line)
             if jar.name:
@@ -71,9 +78,8 @@ def main():
         s = Jsonl(name=jar.name, location=location)
         try:
             cookies[jar.lang].extend(s.load())
-        except FileNotFoundError as e:
-            logger.error(f"File not found: {e}")
-            continue
+        except Exception as e:
+            logger.error(f"Failed to load {jar.name} for {jar.lang}: {e}")
     # Transform
     transformers = [
         FilterByRank(top=500),

@@ -54,7 +54,7 @@ class Score(BaseModel):
         self.overall = self.weighted_score()
 
     def __str__(self):
-        return f"(freq: {self.frequency}, cult: {self.cultural}, pos: {self.positive}, clr: {self.clarity}, long: {self.longevity}) => {self.weighted_score():.2f}"
+        return f"(meaning: {self.explaination}, pop: {self.popularity}, qual: {self.quality}, pos: {self.sentiment}, clr: {self.clarity}) => {self.overall:.2f}"
 
 
 class Cookie(BaseModel):

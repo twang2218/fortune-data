@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from typing import List
+from typing import Any, List, Type
 
 from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
@@ -10,8 +10,8 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai.chat_models import ChatOpenAI
 from loguru import logger
-from model import Cookie, CookieList, Score
-from pydantic import Field, SecretStr
+from model import Cookie, Score
+from pydantic import BaseModel, Field, SecretStr
 
 from .transformer import Transformer
 
@@ -20,9 +20,13 @@ set_llm_cache(SQLiteCache(database_path=LANGCHAIN_DB_PATH))
 
 
 class Scorer(Transformer):
-    provider: str = Field(default="openai", description="The language model provider.")
     model_name: str = Field(
-        default="gpt-4o-mini", description="The language model name."
+        default="openai:gpt-4o-mini",
+        description="The language model provider. format: 'provider:model_name', e.g. 'openai:gpt-4o'",
+    )
+    model_name_fallback: str = Field(
+        default="openai:gpt-4o",
+        description="The fallback language model provider. format: 'provider:model_name', e.g. 'openai:gpt-4o'",
     )
     prompt_template: ChatPromptTemplate = Field(
         default=ChatPromptTemplate.from_messages(
@@ -44,35 +48,21 @@ class Scorer(Transformer):
     batch_size: int = Field(
         default=10, description="The batch size for processing the content."
     )
+    chain: Any = None
+    chain_fallback: Any = None
 
-    def score_batch(self, cookies: List[Cookie]) -> List[Cookie]:
-        # Construct the chain
-        m = load_model(provider=self.provider, model_name=self.model_name)
-        parser = PydanticOutputParser(pydantic_object=CookieList)
-        chain = (
-            self.prompt_template.partial(
-                format_instructions=parser.get_format_instructions()
-            )
-            | m
-            | parser
-        )
+    def __init__(self, **data):
+        super().__init__(**data)
+        logger.debug(f"Create chain => model: {self.model_name}")
+        self.chain = self.get_chain(self.model_name)
+        logger.debug(f"Create fallback chain => model: {self.model_name_fallback}")
+        self.chain_fallback = self.get_chain(self.model_name_fallback)
 
-        cookie_list = CookieList(cookies=cookies)
-        results = chain.invoke({"content": cookie_list.model_dump_json()})
-        if not results:
-            raise ValueError(
-                f"Failed to score batch: [{len(cookies)}]: {cookies[0].model_dump_json()}"
-            )
-        else:
-            for cookie in results.cookies:
-                # TODO: check if this can update the cookie in the original list
-                cookie.score.update_overall()
-        return results
-
-    def score_single(self, cookie: Cookie) -> Cookie:
-        # Construct the chain
-        llm = load_model(provider=self.provider, model_name=self.model_name)
-        parser = PydanticOutputParser(pydantic_object=Cookie)
+    def get_chain(
+        self, model_name: str = "openai:gpt-4o", cls: Type[BaseModel] = Cookie
+    ):
+        llm = load_model(model_name=model_name)
+        parser = PydanticOutputParser(pydantic_object=cls)
         chain = (
             self.prompt_template.partial(
                 format_instructions=parser.get_format_instructions()
@@ -80,81 +70,49 @@ class Scorer(Transformer):
             | llm
             | parser
         )
-
-        llm_fallback = load_model(provider="openai", model_name="gpt-4o")
-        chain_fallback = (
-            self.prompt_template.partial(
-                format_instructions=parser.get_format_instructions()
-            )
-            | llm_fallback
-            | parser
-        )
-
-        try:
-            result = chain.invoke({"content": cookie.model_dump_json()})
-            if not result:
-                raise ValueError("result is None")
-            else:
-                result.score.update_overall()
-            return result
-        except Exception as e:
-            # logger.debug(f"prompt:\n{self.prompt_template.format(format_instructions=parser.get_format_instructions(), content=cookie.model_dump_json())}")
-            logger.warning(f"Failed to score cookie: {cookie.model_dump_json()}: {e}")
-            remove_link_from_cache(cookie.link)
-            # run fallback model
-            logger.debug(f"Running fallback model: {llm_fallback}")
-            result = chain_fallback.invoke({"content": cookie.model_dump_json()})
-            if not result:
-                raise ValueError("result is None")
-            else:
-                result.score.update_overall()
-                logger.debug(f"fallback result: {result}")
-            return result
+        return chain
 
     def score(self, cookies: List[Cookie]) -> List[Cookie]:
-        logger.info(
-            f"LLM Model for scoring: [{self.provider}:{self.model_name}], batch_size: {self.batch_size}, cookies: {len(cookies)}"
-        )
-        if self.batch_size == 1:
-            for i, cookie in enumerate(cookies):
-                try:
-                    cookie.score = self.score_single(cookie).score
-                    print(".", end="", flush=True)
-                    # if (i + 1) % 50 == 0:
-                    #     print()
-                except Exception as e:
-                    logger.error(
-                        f"Failed to score cookie: {cookie.model_dump_json()}: {e}"
+        for i in range(0, len(cookies), self.batch_size):
+            # logger.debug(f"Processing batch {i} to {i+self.batch_size} of {len(cookies)}")
+            batch_cookies = cookies[i : i + self.batch_size]
+            batch_inputs = [
+                {"content": cookie.model_dump_json()} for cookie in batch_cookies
+            ]
+            # Run normal chain
+            results = self.chain.batch(batch_inputs, return_exceptions=True)
+            for j, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logger.warning(
+                        f"Failed to score the cookie on chain '{self.model_name}': cookie: {batch_cookies[j].model_dump_json()} => {result}"
                     )
-                    cookie.score = Score()
-        else:
-            for i in range(0, len(cookies), self.batch_size):
-                logger.debug(
-                    f"Processing batch {i} to {i+self.batch_size} of {len(cookies)}"
-                )
-                batch_cookies = cookies[i : i + self.batch_size]
-                try:
-                    batch_results = self.score_batch(batch_cookies)
-                    for j, cookie in enumerate(batch_results.cookies):
-                        cookies[i + j].score = cookie.score
-                        print(".", end="", flush=True)
-                    # print("." * self.batch_size)
-                except Exception as e:
-                    logger.error(
-                        f"Failed to score batch {i} to {i+self.batch_size}: {e}"
-                    )
-                    for j in range(i, i + self.batch_size):
-                        cookies[j].score = Score()
+                    try:
+                        # fallback to chain_fallback
+                        result = self.chain_fallback.invoke(batch_inputs[j])
+                        logger.debug(
+                            f"fallback chain '{self.model_name_fallback}' result: {result.score.model_dump_json()}"
+                        )
+                    except Exception as e:
+                        # cannot fallback, set score to 0
+                        logger.error(
+                            f"Failed on fallback chain '{self.model_name_fallback}': {e}"
+                        )
+                        result = Cookie()
+                        result.score = Score()
 
+                if result:
+                    result.score.update_overall()
+                    cookies[i + j].score = result.score
+                    print(".", end="", flush=True)
+                    # logger.debug(f"cookie: {batch_cookies[j]} => {result.score.model_dump_json()}")
         return cookies
 
     def transform(self, cookies: List[Cookie]) -> List[Cookie]:
         return self.score(cookies)
 
 
-def load_model(
-    provider: str = "openai", model_name: str = "gpt-4o-mini"
-) -> BaseChatModel:
+def load_model(model_name: str = "openai:gpt-4o") -> BaseChatModel:
+    provider, model_name = model_name.split(":")
     # logger.info(f"model: {provider} : {model_name}")
     m: BaseChatModel
     if provider == "openai":

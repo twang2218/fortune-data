@@ -52,9 +52,9 @@ class MingJuCrawler(Crawler):
             links = element.find_all("a")
             if links and len(links) > 0:
                 cookie = Cookie(
-                    title=self.get_text(links[1]) if len(links) > 1 else "",
+                    title=self.get_content(links[1]) if len(links) > 1 else "",
                     author="",
-                    content=self.get_text(links[0]),
+                    content=self.get_content(links[0]),
                     source="",
                     link=self.get_link(links[0]),
                 )
@@ -83,7 +83,7 @@ class MingJuCrawler(Crawler):
                 crawler = MingJuCrawler()
                 return crawler.crawl(jar)
             case _:
-                raise ValueError(f"Invalid extractor: {jar.extractor}")
+                raise ValueError(f"MingJuCrawler: Invalid extractor: {jar.extractor}")
 
 
 class GuShiCrawler(Crawler):
@@ -123,9 +123,9 @@ class GuShiCrawler(Crawler):
             return None
         try:
             cookie = Cookie(
-                title=self.get_text(element.find("h1")),
-                author=self.get_text(element.find("p", class_="source")),
-                content=self.get_text(element.find("div", class_="contson")),
+                title=self.get_content(element.find("h1")),
+                author=self.get_content(element.find("p", class_="source")),
+                content=self.get_content(element.find("div", class_="contson")),
                 source="",
                 link="",
             )
@@ -152,7 +152,7 @@ class GuShiCrawler(Crawler):
                 crawler = GuShiCrawler()
                 return crawler.crawl(jar)
             case _:
-                raise ValueError(f"Invalid extractor: {jar.extractor}")
+                raise ValueError(f"GuShiCrawler: Invalid extractor: {jar.extractor}")
 
 
 class ShiWenCrawler(GuShiCrawler):
@@ -207,18 +207,19 @@ class ShiWenCrawler(GuShiCrawler):
                 crawler = ShiWenCrawler()
                 return crawler.crawl(jar)
             case _:
-                raise ValueError(f"Invalid extractor: {jar.extractor}")
+                raise ValueError(f"ShiWenCrawler: Invalid extractor: {jar.extractor}")
 
 
 class GushiwenCrawler(Crawler):
     @staticmethod
     def extract(jar: CookieJar) -> List[Cookie]:
-        match jar.extractor.split("."):
-            case _, _, "mingju", _:
+        parts = jar.extractor.split(".")
+        match parts[2]:
+            case "mingju":
                 return MingJuCrawler.extract(jar)
-            case _, _, "gushi", _:
+            case "gushi":
                 return GuShiCrawler.extract(jar)
-            case _, _, "shiwen", _:
+            case "shiwen":
                 return ShiWenCrawler.extract(jar)
             case _:
-                raise ValueError(f"Invalid extractor: {jar.extractor}")
+                raise ValueError(f"GushiwenCrawler: Invalid extractor: {jar.extractor}")
