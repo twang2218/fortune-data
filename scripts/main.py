@@ -3,16 +3,17 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
+from loguru import logger
+
+from common.model import CookieJar
 from extract import Extractor
 from load import CookieDB, Jsonl
-from loguru import logger
-from model import CookieJar
 from transform import (
+    ChineseConverter,
     FilterByLength,
     FilterByRank,
     FilterByScore,
     Scorer,
-    ChineseConverter,
 )
 
 
@@ -49,6 +50,7 @@ def process_jar(jar):
         logger.info(f"Processing '{jar.name}' completed. {len(cookies)} cookies saved.")
     except Exception as e:
         logger.error(f"Processing '{jar.name}' failed: {e}")
+        logger.exception(e)
 
 
 def main():

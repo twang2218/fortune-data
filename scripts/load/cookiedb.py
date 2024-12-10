@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import List
 
 from loguru import logger
-from model import Cookie
 from pydantic import Field
+
+from common import Cookie
 
 from .loader import Loader
 

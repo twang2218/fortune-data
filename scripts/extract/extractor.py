@@ -1,7 +1,9 @@
 from typing import List
+
 from pydantic import BaseModel
 
-from model import Cookie, CookieJar
+from common import Cookie, CookieJar
+
 from .crawler import Crawler
 
 

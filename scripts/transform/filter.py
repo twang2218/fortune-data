@@ -1,8 +1,9 @@
 from numbers import Number
 from typing import List
 
-from model import Cookie
 from pydantic import Field
+
+from common import Cookie
 
 from .transformer import Transformer
 

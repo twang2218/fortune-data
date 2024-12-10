@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from model import Cookie
+from common import Cookie
 
 from .loader import Loader
 

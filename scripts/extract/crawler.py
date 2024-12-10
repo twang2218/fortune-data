@@ -5,9 +5,10 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from loguru import logger
-from model import Cookie, CookieJar
 from pydantic import BaseModel, Field
 from requests_cache import AnyResponse, CachedSession
+
+from common import Cookie, CookieJar
 
 # 设置缓存，有效期为1个月
 # requests_cache.install_cache(

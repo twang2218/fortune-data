@@ -1,8 +1,9 @@
 from typing import List
 
 from loguru import logger
-from model import Cookie, CookieJar
 from pydantic import Field
+
+from common import Cookie, CookieJar
 
 from .crawler import Crawler
 

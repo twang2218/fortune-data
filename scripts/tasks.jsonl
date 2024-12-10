@@ -67,11 +67,11 @@
 // {"lang": "zh_CN", "name": "歇后语", "extractor": "crawler.xinhua.xiehouyu", "model_name": "tongyi:qwen-turbo-latest"}
 {"lang": "zh_CN", "name": "成语", "extractor": "crawler.xinhua.idiom", "model_name": "tongyi:qwen-turbo-latest"}
 
-{"lang": "zh_CN", "name": "鲁迅", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
-{"lang": "zh_CN", "name": "老舍", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
-{"lang": "zh_CN", "name": "朱自清", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
-{"lang": "zh_CN", "name": "毛泽东", "extractor": "crawler.wikiquote", "model_name": "openai:gpt-4o"}
-{"lang": "zh_CN", "name": "孙文", "extractor": "crawler.wikiquote", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "鲁迅", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "老舍", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "朱自清", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
+{"lang": "zh_CN", "name": "毛泽东", "extractor": "crawler.wikiquote.zh", "model_name": "openai:gpt-4o"}
+{"lang": "zh_CN", "name": "孙文", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
 
 // en
 
