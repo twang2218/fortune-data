@@ -114,7 +114,7 @@ class Agent(BaseModel):
         inputs = [{"content": content} for content in contents]
         results = []
         # process the inputs
-        logger.debug(f"Agent.process(): Processing {len(inputs)} contents")
+        # logger.debug(f"Agent.process(): {len(inputs)} contents")
         for i in range(0, len(inputs), self.batch_size):
             batch_inputs = inputs[i : i + self.batch_size]
             batch_results = self.get_chain().batch(batch_inputs, return_exceptions=True)

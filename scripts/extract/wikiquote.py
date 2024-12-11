@@ -43,6 +43,14 @@ class WikiQuoteCrawler(Crawler):
         default=["\\]", "\\)"],
         description="The right parentheses to remove from the source text.",
     )
+    quotation_marks_left: List[str] = Field(
+        default=["'", "“", "‘"],
+        description="The left quotation marks to remove from the quote text.",
+    )
+    quotation_marks_right: List[str] = Field(
+        default=["'", "”", "’"],
+        description="The right quotation marks to remove from the quote text.",
+    )
 
     def format_url(self, jar: CookieJar) -> str:
         _, _, lang = jar.extractor.split(".")
@@ -97,7 +105,7 @@ class WikiQuoteCrawler(Crawler):
                 elif adjacent.name == "p" and len(adjacent.text.strip()) < 50:
                     source_element = adjacent
 
-        content = self.parse_element_text(element)
+        content = self.parse_content(element)
         source = self.parse_source(source_element)
 
         if not source:
@@ -108,6 +116,14 @@ class WikiQuoteCrawler(Crawler):
             content=content,
             source=source,
         )
+
+    def parse_content(self, element) -> str:
+        content = self.parse_element_text(element) if element else ""
+        for leading in self.source_leadings:
+            if content.strip().startswith(leading):
+                # it's a source, not a quote
+                return ""
+        return content
 
     def parse_source(self, element) -> str:
         source = self.parse_element_text(element) if element else ""
@@ -153,6 +169,9 @@ class WikiQuoteCrawler(Crawler):
         agent = Agent(prompt=self.prompt, base_model=jar.model_name, cls=Quote)
         cookies_with_source = [cookie for cookie in cookies if cookie.source]
         cookies_without_source = [cookie for cookie in cookies if not cookie.source]
+        logger.debug(
+            f"Agent({jar.model_name}): '{jar.name}': cookies_without_source: {len(cookies_without_source)} / total: {len(cookies)}"
+        )
         quotes = agent.process([cookie.content for cookie in cookies_without_source])
         for i, quote in enumerate(quotes):
             cookie = cookies_without_source[i]
@@ -205,24 +224,32 @@ class EnWikiQuoteCrawler(WikiQuoteCrawler):
 
 class ZhWikiQuoteCrawler(WikiQuoteCrawler):
     whitelist: List[str] = Field(
-        default=["语录", "語錄", "名言", "作品摘录"],
-        description="白名单，只爬取白名单内的标题",
+        default=WikiQuoteCrawler.model_fields["whitelist"].default
+        + ["语录", "語錄", "名言", "作品摘录"],
     )
     blacklist: List[str] = Field(
-        default=["模板", "分类", "帮助", "MediaWiki", "Wikiquote", "参见", "参考文献"],
-        description="黑名单，不爬取黑名单内的标题",
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + ["模板", "分类", "帮助", "MediaWiki", "Wikiquote", "参见", "参考文献"],
     )
     source_leadings: List[str] = Field(
-        default=["--", "——", "出自", "引自", "来源", "摘自"],
-        description="需要移除的引用前缀",
+        default=WikiQuoteCrawler.model_fields["source_leadings"].default
+        + ["——", "出自", "引自", "来源", "摘自"],
     )
     parentheses_left: List[str] = Field(
-        default=["\\[", "\\(", "（", "【", "《"],
-        description="The left parentheses to remove from the source text.",
+        default=WikiQuoteCrawler.model_fields["parentheses_left"].default
+        + ["（", "【", "《"],
     )
     parentheses_right: List[str] = Field(
-        default=["\\]", "\\)", "）", "】", "》"],
-        description="The right parentheses to remove from the source text.",
+        default=WikiQuoteCrawler.model_fields["parentheses_right"].default
+        + ["）", "】", "》"],
+    )
+    quotation_marks_left: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["quotation_marks_left"].default
+        + ["「", "『", "《", "【", "〈", "〔", "〖"],
+    )
+    quotation_marks_right: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["quotation_marks_right"].default
+        + ["」", "』", "》", "】", "〉", "〕", "〗"],
     )
 
     def format_url(self, jar: CookieJar) -> str:
@@ -230,8 +257,14 @@ class ZhWikiQuoteCrawler(WikiQuoteCrawler):
 
     def process_source(self, cookies: List[Cookie], jar: CookieJar) -> List[Cookie]:
         for cookie in cookies:
-            if cookie.source and "《" not in cookie.source:
-                cookie.source = f"《{cookie.source}》"
+            if cookie.source:
+                contains_quotation_mark = False
+                for mark in self.quotation_marks_left + self.quotation_marks_right:
+                    if mark in cookie.source:
+                        contains_quotation_mark = True
+                        break
+                if not contains_quotation_mark:
+                    cookie.source = f"《{cookie.source}》"
 
         cookies = super().process_source(cookies, jar)
 
