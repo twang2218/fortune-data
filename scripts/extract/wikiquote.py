@@ -1,4 +1,5 @@
-from typing import List
+import re
+from typing import List, Tuple
 
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -30,6 +31,18 @@ class WikiQuoteCrawler(Crawler):
     prompt: str = Field(
         default="Please evaluate the following content, and extract the quote and source(if applicable) from the given text only. Do not add, infer, or supplement any information that is not explicitly present in the given text. Do not include any additional commentary or background information that follows.",
     )
+    source_leadings: List[str] = Field(
+        default=["--"],
+        description="The leading characters to remove from the source text.",
+    )
+    parentheses_left: List[str] = Field(
+        default=["\\[", "\\("],
+        description="The left parentheses to remove from the source text.",
+    )
+    parentheses_right: List[str] = Field(
+        default=["\\]", "\\)"],
+        description="The right parentheses to remove from the source text.",
+    )
 
     def format_url(self, jar: CookieJar) -> str:
         _, _, lang = jar.extractor.split(".")
@@ -59,6 +72,10 @@ class WikiQuoteCrawler(Crawler):
                 text += "\n"
             elif content.name == "b":
                 text += content.text.strip()
+            elif content.name == "i":
+                text += content.text.strip()
+            elif content.name == "strong":
+                text += content.text.strip()
             elif content.name in ["sup", "span"]:
                 continue
             else:
@@ -70,11 +87,46 @@ class WikiQuoteCrawler(Crawler):
         source_element = element.find("dd")
         if not source_element:
             source_element = element.find("li")
+        if not source_element:
+            adjacent = element.next_sibling
+            if not adjacent:
+                adjacent = element.parent.next_sibling if element.parent else None
+            if adjacent:
+                if adjacent.name == "dl":
+                    source_element = adjacent.find("dd")
+                elif adjacent.name == "p" and len(adjacent.text.strip()) < 50:
+                    source_element = adjacent
+
+        content = self.parse_element_text(element)
+        source = self.parse_source(source_element)
+
+        if not source:
+            # 尝试从 content 中提取 source
+            content, source = self.parse_source_from_content(content)
 
         return Cookie(
-            content=self.parse_element_text(element),
-            source=self.parse_element_text(source_element) if source_element else "",
+            content=content,
+            source=source,
         )
+
+    def parse_source(self, element) -> str:
+        source = self.parse_element_text(element) if element else ""
+        if source:
+            for leading in self.source_leadings:
+                source = source.strip().lstrip(leading).strip()
+        return source
+
+    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+        left = "".join([f"{p}" for p in self.parentheses_left])
+        right = "".join([f"{p}" for p in self.parentheses_right])
+        pattern = re.compile(r"^(.*?)(?:[" + left + r"](.*?)[" + right + r"])\s*$")
+        m = pattern.match(content)
+        if m:
+            quote = m.group(1).strip()
+            source = m.group(2).strip()
+            return quote, source
+        else:
+            return content, ""
 
     def crawl(self, jar: CookieJar) -> List[Cookie]:
         logger.info(f"开始爬取 《{jar.name}》")
@@ -114,9 +166,6 @@ class WikiQuoteCrawler(Crawler):
 
     def process_source(self, cookies: List[Cookie], jar: CookieJar) -> List[Cookie]:
         for cookie in cookies:
-            if cookie.source:
-                cookie.source = cookie.source.strip().lstrip("——").strip()
-
             if jar.name not in cookie.source:
                 cookie.source = f"{cookie.source} {jar.name}"
                 cookie.source = cookie.source.strip()
@@ -163,16 +212,24 @@ class ZhWikiQuoteCrawler(WikiQuoteCrawler):
         default=["模板", "分类", "帮助", "MediaWiki", "Wikiquote", "参见", "参考文献"],
         description="黑名单，不爬取黑名单内的标题",
     )
+    source_leadings: List[str] = Field(
+        default=["--", "——", "出自", "引自", "来源", "摘自"],
+        description="需要移除的引用前缀",
+    )
+    parentheses_left: List[str] = Field(
+        default=["\\[", "\\(", "（", "【", "《"],
+        description="The left parentheses to remove from the source text.",
+    )
+    parentheses_right: List[str] = Field(
+        default=["\\]", "\\)", "）", "】", "》"],
+        description="The right parentheses to remove from the source text.",
+    )
 
     def format_url(self, jar: CookieJar) -> str:
         return self.base_url.format(title=jar.name, lang="zh")
 
     def process_source(self, cookies: List[Cookie], jar: CookieJar) -> List[Cookie]:
         for cookie in cookies:
-            if cookie.source:
-                cookie.source = (
-                    cookie.source.strip().lstrip("——").strip().lstrip("出自").strip()
-                )
             if cookie.source and "《" not in cookie.source:
                 cookie.source = f"《{cookie.source}》"
 

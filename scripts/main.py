@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from loguru import logger
 
-from common.model import CookieJar
+from common import CookieJar
 from extract import Extractor
 from load import CookieDB, Jsonl
 from transform import (
