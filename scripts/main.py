@@ -32,7 +32,7 @@ def process_jar(jar):
             FilterByLength(min_length=5, max_length=300),
             Scorer(model_name=jar.model_name, batch_size=batch_size),
             FilterByScore(score=6.5),
-            FilterByRank(top=500),
+            FilterByRank(top=jar.limit),
         ]
         if jar.lang.startswith("zh"):
             transformers.append(ChineseConverter(lang=jar.lang))

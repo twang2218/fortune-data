@@ -2,7 +2,7 @@ import:
 	uv run main.py
 
 test:
-	uv run pytest
+	uv run pytest -vv
 
 clean:
 	ruff clean

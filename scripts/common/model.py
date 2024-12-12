@@ -118,3 +118,11 @@ class CookieJar(BaseModel):
         default="tongyi:qwen-turbo-latest",
         description="The language model name.",
     )
+    limit: int = Field(
+        default=10000,
+        description="The limit of number of cookies to extract.",
+    )
+    is_category: bool = Field(
+        default=False,
+        description="Whether the task is a category.",
+    )

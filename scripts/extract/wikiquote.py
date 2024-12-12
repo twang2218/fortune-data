@@ -25,14 +25,14 @@ class WikiQuoteCrawler(Crawler):
         description="whitelist, only crawl the title in the white list",
     )
     blacklist: List[str] = Field(
-        default=[],
+        default=["See also", "References", "External links"],
         description="blacklist, never crawl the title in the black list",
     )
     prompt: str = Field(
         default="Please evaluate the following content, and extract the quote and source(if applicable) from the given text only. Do not add, infer, or supplement any information that is not explicitly present in the given text. Do not include any additional commentary or background information that follows.",
     )
     source_leadings: List[str] = Field(
-        default=["--"],
+        default=["--", "-", "–", "~", "—"],
         description="The leading characters to remove from the source text.",
     )
     parentheses_left: List[str] = Field(
@@ -54,7 +54,7 @@ class WikiQuoteCrawler(Crawler):
 
     def format_url(self, jar: CookieJar) -> str:
         _, _, lang = jar.extractor.split(".")
-        return self.base_url.format(title=jar.name, lang=lang)
+        return self.base_url.format(title=jar.name.replace(" ", "_"), lang=lang)
 
     def parse_list(self, soup) -> List[str]:
         quotes = []
@@ -73,17 +73,19 @@ class WikiQuoteCrawler(Crawler):
         text = ""
         for content in element.contents:
             if isinstance(content, str):
-                text += content.strip()
-            elif content.name == "a":
-                text += content.text.strip()
+                text += content
             elif content.name == "br":
                 text += "\n"
+            elif content.name == "a":
+                text += self.parse_element_text(content)
             elif content.name == "b":
-                text += content.text.strip()
+                text += self.parse_element_text(content)
             elif content.name == "i":
-                text += content.text.strip()
+                text += self.parse_element_text(content)
             elif content.name == "strong":
-                text += content.text.strip()
+                text += self.parse_element_text(content)
+            elif content.name == "p":
+                text += self.parse_element_text(content) + "\n"
             elif content.name in ["sup", "span"]:
                 continue
             else:
@@ -108,13 +110,13 @@ class WikiQuoteCrawler(Crawler):
         content = self.parse_content(element)
         source = self.parse_source(source_element)
 
-        if not source:
+        if content and not source:
             # 尝试从 content 中提取 source
             content, source = self.parse_source_from_content(content)
 
         return Cookie(
-            content=content,
-            source=source,
+            content=content.strip(),
+            source=source.strip(),
         )
 
     def parse_content(self, element) -> str:
@@ -140,9 +142,11 @@ class WikiQuoteCrawler(Crawler):
         if m:
             quote = m.group(1).strip()
             source = m.group(2).strip()
-            return quote, source
-        else:
-            return content, ""
+            if quote and source:
+                return quote, source
+
+        logger.debug(f"Failed to extract source from content: {content}")
+        return content, ""
 
     def crawl(self, jar: CookieJar) -> List[Cookie]:
         logger.info(f"开始爬取 《{jar.name}》")
@@ -169,6 +173,8 @@ class WikiQuoteCrawler(Crawler):
         agent = Agent(prompt=self.prompt, base_model=jar.model_name, cls=Quote)
         cookies_with_source = [cookie for cookie in cookies if cookie.source]
         cookies_without_source = [cookie for cookie in cookies if not cookie.source]
+        if len(cookies_without_source) == 0:
+            return cookies
         logger.debug(
             f"Agent({jar.model_name}): '{jar.name}': cookies_without_source: {len(cookies_without_source)} / total: {len(cookies)}"
         )
@@ -185,7 +191,7 @@ class WikiQuoteCrawler(Crawler):
 
     def process_source(self, cookies: List[Cookie], jar: CookieJar) -> List[Cookie]:
         for cookie in cookies:
-            if jar.name not in cookie.source:
+            if not jar.is_category and jar.name not in cookie.source:
                 cookie.source = f"{cookie.source} {jar.name}"
                 cookie.source = cookie.source.strip()
 
@@ -201,13 +207,25 @@ class WikiQuoteCrawler(Crawler):
 
     @staticmethod
     def extract(jar: CookieJar) -> List[Cookie]:
-        match jar.extractor.split("."):
+        parts = jar.extractor.split(".")
+        match parts[0], parts[1], parts[2]:
             case "crawler", "wikiquote", "zh":
                 crawler = ZhWikiQuoteCrawler()
                 return crawler.crawl(jar)
             case "crawler", "wikiquote", "en":
-                crawler = EnWikiQuoteCrawler()
-                return crawler.crawl(jar)
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyEnWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = EnWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+            case "crawler", "wikiquote", "de":
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyDeWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = DeWikiQuoteCrawler()
+                    return crawler.crawl(jar)
             case "crawler", "wikiquote", _:
                 crawler = WikiQuoteCrawler()
                 return crawler.crawl
@@ -218,8 +236,127 @@ class WikiQuoteCrawler(Crawler):
 
 
 class EnWikiQuoteCrawler(WikiQuoteCrawler):
-    def format_url(self, jar: CookieJar) -> str:
-        return self.base_url.format(title=jar.name, lang="en")
+    pass
+
+
+class DailyEnWikiQuoteCrawler(EnWikiQuoteCrawler):
+    base_url: str = Field(
+        default="https://en.wikiquote.org/wiki/Wikiquote:Quote_of_the_Day"
+    )
+
+    def parse_list(self, soup) -> List[str]:
+        quotes = []
+        body = soup.select_one("div.mw-parser-output")
+        for item in body.select("div.mw-parser-output > dl > dd") + body.select(
+            "div.mw-parser-output > ol > li"
+        ):
+            quotes.append(item)
+        return quotes
+
+    def parse_item(self, element) -> Cookie:
+        return super().parse_item(element)
+
+    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+        leading = "|".join(self.source_leadings)
+        leading = r"(?:\s*(?:" + leading + r")\s*)"
+        index = r"(?:\d+\.?\s+)?"
+        cap_group = r"(.*?)"
+        pattern = r"^" + index + cap_group + leading + cap_group + leading + r"?\s*$"
+        # print(pattern)
+        pattern = re.compile(pattern, re.MULTILINE | re.DOTALL)
+        m = pattern.match(content)
+        if m:
+            quote = m.group(1).strip()
+            source = m.group(2).strip()
+            if quote and source:
+                return quote, source
+
+        return content, ""
+
+    def crawl(self, jar: CookieJar) -> List[Cookie]:
+        logger.info(f"开始爬取 《{jar.name}》")
+        cookies = []
+
+        jar.link = self.base_url
+        soup = self.get_page(jar.link)
+        if not soup:
+            return cookies
+
+        for item in self.parse_list(soup):
+            cookie = self.parse_item(item)
+            if cookie.content:
+                cookie.link = jar.link
+                cookies.append(cookie)
+
+        cookies = self.process_cookies(cookies, jar)
+
+        logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
+        return cookies
+
+
+class DeWikiQuoteCrawler(WikiQuoteCrawler):
+    blacklist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + ["Literatur", "Weblinks", "Einzelnachweise", "Siehe auch"],
+    )
+    source_leadings: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["source_leadings"].default
+        + ["aus", "von", "zitiert in", "zitiert nach"],
+    )
+
+    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+        leadings = "|".join(self.source_leadings)
+        leadings = f"(?:{leadings})?"
+        comments = r"(?:\(.*?\))?"
+        pattern = (
+            r"^\"(.*?)\"\s*"
+            + comments
+            + r"\s*"
+            + leadings
+            + r"\s*(.*?)\s*"
+            + comments
+            + r"\s*$"
+        )
+        # print(pattern)
+        pattern = re.compile(pattern)
+        m = pattern.match(content)
+        if m:
+            quote = m.group(1).strip()
+            source = m.group(2).strip()
+            return quote, source
+        else:
+            return content, ""
+
+
+class DailyDeWikiQuoteCrawler(DeWikiQuoteCrawler):
+    base_url: str = Field(
+        default="https://de.wikiquote.org/wiki/Vorlage:Zitat_des_Tages/{title}"
+    )
+    sub_titles: List[str] = Field(
+        ["Archiv_2004", "Archiv_2005", "Archiv_2006", "Archiv_2007", "Archiv_2008"]
+    )
+
+    def crawl(self, jar: CookieJar) -> List[Cookie]:
+        logger.info(f"开始爬取 《{jar.name}》")
+        cookies = []
+
+        jar.link = self.base_url.format(title="Archiv")
+        for sub_title in self.sub_titles:
+            url = self.base_url.format(title=sub_title)
+            soup = self.get_page(url)
+            if not soup:
+                continue
+
+            for item in self.parse_list(soup):
+                cookie = self.parse_item(item)
+                if cookie.content:
+                    cookie.link = url
+                    cookies.append(cookie)
+
+        cookies = self.process_cookies(cookies, jar)
+
+        logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
+        return cookies
 
 
 class ZhWikiQuoteCrawler(WikiQuoteCrawler):

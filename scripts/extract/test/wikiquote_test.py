@@ -1,6 +1,97 @@
 from bs4 import BeautifulSoup
+from extract import (
+    DailyEnWikiQuoteCrawler,
+    DeWikiQuoteCrawler,
+    # EnWikiQuoteCrawler,
+    ZhWikiQuoteCrawler,
+)
 
-from scripts.extract import ZhWikiQuoteCrawler
+
+def test_crawler_wikiquote_de():
+    testcases = [
+        (
+            """
+"Abends werden die Faulen fleissig." - Citatboken, Bokförlaget Natur och Kultur, Stockholm, 1967, ISBN 91-27-01681-1
+""",
+            "Abends werden die Faulen fleissig.",
+            "Citatboken, Bokförlaget Natur och Kultur, Stockholm, 1967, ISBN 91-27-01681-1",
+        ),
+        (
+            """
+"Abwarten und Tee trinken." - Wander-DSL, Bd. 5, Sp. 702, commons. (Dort zitiert als: "Abwarten und Theetrinken.")
+""",
+            "Abwarten und Tee trinken.",
+            'Wander-DSL, Bd. 5, Sp. 702, commons. (Dort zitiert als: "Abwarten und Theetrinken.")',
+        ),
+        (
+            """
+"Adel verpflichtet." (Noblesse oblige) - nach Pierre-Marc-Gaston de Lévis, Maximes et réflections
+""",
+            "Adel verpflichtet.",
+            "nach Pierre-Marc-Gaston de Lévis, Maximes et réflections",
+        ),
+        (
+            """
+            "Die Katze Erinnerung: Unabhängig, unbestechlich, ungehorsam. Und doch ein wohltuender Geselle, wenn sie sich zeigt, selbst wenn sie sich unerreichbar hält." - Uwe Johnson (27. August)
+""",
+            "Die Katze Erinnerung: Unabhängig, unbestechlich, ungehorsam. Und doch ein wohltuender Geselle, wenn sie sich zeigt, selbst wenn sie sich unerreichbar hält.",
+            "Uwe Johnson",
+        ),
+    ]
+
+    crawler = DeWikiQuoteCrawler()
+
+    for text, content, source in testcases:
+        content, source = crawler.parse_source_from_content(text)
+        assert content == content
+        assert source == source
+
+
+def test_crawler_wikiquote_en_daily():
+    testcases = [
+        (
+            """<dd>11.  I have a dream that my four little children will one day live in a nation where they will not be judged by the color of their skin but by the content of their character. ~ <a href="/wiki/Martin_Luther_King" class="mw-redirect" title="Martin Luther King">Martin Luther King</a> <small> (This was the first "Quote of the Day" at Wikiquote, selected by <a href="/wiki/User:Nanobug" title="User:Nanobug">Nanobug</a> on <a href="/wiki/11_July" class="mw-redirect" title="11 July">11 July</a> <a href="/wiki/2003" class="mw-disambig" title="2003">2003</a>.) </small></dd>""",
+            "I have a dream that my four little children will one day live in a nation where they will not be judged by the color of their skin but by the content of their character.",
+            "Martin Luther King",
+        ),
+        (
+            """<dd>20. I found one day in school a boy of medium size ill-treating a smaller boy. I expostulated, but he replied: 'The bigs hit me, so I hit the babies; that's fair.' In these words he epitomized the history of the human race. ~ <i>Education and the Social Order</i> by <a href="/wiki/Bertrand_Russell" title="Bertrand Russell">Bertrand Russell</a></dd>""",
+            "I found one day in school a boy of medium size ill-treating a smaller boy. I expostulated, but he replied: 'The bigs hit me, so I hit the babies; that's fair.' In these words he epitomized the history of the human race.",
+            "Education and the Social Order by Bertrand Russell",
+        ),
+        (
+            """<li><i>Where is the Life we have lost in living? <br> Where is the wisdom we have lost in knowledge? <br> Where is the knowledge we have lost in information?</i> <br> ~ <a href="/wiki/T._S._Eliot" title="T. S. Eliot">T. S. Eliot</a> ~</li>""",
+            "Where is the Life we have lost in living? \n Where is the wisdom we have lost in knowledge? \n Where is the knowledge we have lost in information?",
+            "T. S. Eliot",
+        ),
+        (
+            """<dd>15. <i>Our chiefs said 'Done,' and I did not deem it; <br> Our seers said 'Peace,' and it was not peace; <br> Earth will grow worse till men redeem it, <br> And wars more evil, ere all wars cease.</i> <br> ~ "A Song of Defeat" by <a href="/wiki/Gilbert_Keith_Chesterton" class="mw-redirect" title="Gilbert Keith Chesterton">Gilbert Keith Chesterton</a> ~</dd>""",
+            "Our chiefs said 'Done,' and I did not deem it; \n Our seers said 'Peace,' and it was not peace; \n Earth will grow worse till men redeem it, \n And wars more evil, ere all wars cease.",
+            '"A Song of Defeat" by Gilbert Keith Chesterton',
+        ),
+        (
+            """
+            <li><i>And, oh! what beautiful years were these<br> When our hearts clung each to each;<br>When life was filled and our senses thrilled<br> In the first faint dawn of speech.</i><p class="mw-empty-elt"></p><p><i>Thus life by life and love by love<br> We passed through the cycles strange,<br>And breath by breath and death by death<br> We followed the chain of change.</i> <br> ~ <a href="/wiki/Langdon_Smith" title="Langdon Smith">Langdon Smith</a> ~</p></li>
+""",
+            "And, oh! what beautiful years were these\n When our hearts clung each to each;\nWhen life was filled and our senses thrilled\n In the first faint dawn of speech.\nThus life by life and love by love\n We passed through the cycles strange,\nAnd breath by breath and death by death\n We followed the chain of change.",
+            "Langdon Smith",
+        ),
+        (
+            """<li>My life seemed to be a series of events and accidents. Yet when I look back I see a pattern.~ <a href="/wiki/Beno%C3%AEt_Mandelbrot" title="Benoît Mandelbrot">Benoît Mandelbrot</a></li>""",
+            "My life seemed to be a series of events and accidents. Yet when I look back I see a pattern.",
+            "Benoît Mandelbrot",
+        ),
+    ]
+
+    crawler = DailyEnWikiQuoteCrawler()
+    for html, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find("li")
+        if not element:
+            element = soup.find("dd")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
 
 
 def test_crawler_wikiquote_zh():

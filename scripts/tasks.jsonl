@@ -1,4 +1,100 @@
 
+// en
+
+// {"lang": "en", "name": "art", "extractor": "crawler.fortune_mod.art", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "computers", "extractor": "crawler.fortune_mod.computers", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "cookie", "extractor": "crawler.fortune_mod.cookie", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "education", "extractor": "crawler.fortune_mod.education", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "ethnic", "extractor": "crawler.fortune_mod.ethnic", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "food", "extractor": "crawler.fortune_mod.food", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "fortunes", "extractor": "crawler.fortune_mod.fortunes", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "humorists", "extractor": "crawler.fortune_mod.humorists", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "kids", "extractor": "crawler.fortune_mod.kids", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "law", "extractor": "crawler.fortune_mod.law", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "literature", "extractor": "crawler.fortune_mod.literature", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "love", "extractor": "crawler.fortune_mod.love", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "magic", "extractor": "crawler.fortune_mod.magic", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "medicine", "extractor": "crawler.fortune_mod.medicine", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "men-women", "extractor": "crawler.fortune_mod.men-women", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "news", "extractor": "crawler.fortune_mod.news", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "people", "extractor": "crawler.fortune_mod.people", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "pets", "extractor": "crawler.fortune_mod.pets", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "songs-poems", "extractor": "crawler.fortune_mod.songs-poems", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "riddles", "extractor": "crawler.fortune_mod.riddles", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "sports", "extractor": "crawler.fortune_mod.sports", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "startrek", "extractor": "crawler.fortune_mod.startrek", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "tao", "extractor": "crawler.fortune_mod.tao", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "wisdom", "extractor": "crawler.fortune_mod.wisdom", "model_name": "openai:gpt-4o-mini"}
+// {"lang": "en", "name": "work", "extractor": "crawler.fortune_mod.work", "model_name": "openai:gpt-4o-mini"}
+
+{"lang": "en", "name": "Architecture", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+//  329 => 185
+{"lang": "en", "name": "Art", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 59 => 21
+// {"lang": "en", "name": "Artificial_intelligence", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+//  269 => 199
+{"lang": "en", "name": "Books", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+//  70 => 49
+{"lang": "en", "name": "Cats", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 22
+// {"lang": "en", "name": "Computers", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "en", "name": "Cooking", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 83 => 51
+{"lang": "en", "name": "Dogs", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "en", "name": "Eating", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 38
+{"lang": "en", "name": "Education", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini"}
+{"lang": "en", "name": "Food", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 108 => 68
+{"lang": "en", "name": "Fortune", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 22
+// {"lang": "en", "name": "Laozi", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini"}
+// 1581 => 1188
+{"lang": "en", "name": "Love", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 259 => 187
+{"lang": "en", "name": "Music", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 55 => 34
+{"lang": "en", "name": "News", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+//  28
+// {"lang": "en", "name": "Painting", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 16
+// {"lang": "en", "name": "Photography", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 234 => 170
+{"lang": "en", "name": "Poetry", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 49 => 36
+{"lang": "en", "name": "Programming", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 495 => 222
+{"lang": "en", "name": "Religion", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 13
+// {"lang": "en", "name": "Sports", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 137 => 66
+{"lang": "en", "name": "Technology", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 195 => 144
+{"lang": "en", "name": "Wisdom", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+// 380 => 233
+{"lang": "en", "name": "Work", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+{"lang": "en", "name": "Daily", "extractor": "crawler.wikiquote.en.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+// de
+
+{"lang": "de", "name": "Buch", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Christ", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Christentum", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Deutsche_Sprichwörter", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Islam", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Koran", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Kunst", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Liebe", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Musik", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Poesie", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Religion", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "de", "name": "Weisheit", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+{"lang": "de", "name": "Daily", "extractor": "crawler.wikiquote.de.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+// zh_CN
+
 {"lang": "zh_CN", "name": "论语", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
 {"lang": "zh_CN", "name": "大学", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
 {"lang": "zh_CN", "name": "孟子", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
@@ -64,7 +160,7 @@
 
 {"lang": "zh_CN", "name": "近现代", "extractor": "crawler.gushiwen.shiwen.cstr", "model_name": "tongyi:qwen-turbo-latest"}
 
-// {"lang": "zh_CN", "name": "歇后语", "extractor": "crawler.xinhua.xiehouyu", "model_name": "tongyi:qwen-turbo-latest"}
+// {"lang": "zh_CN", "name": "歇后语", "extractor": "crawler.xinhua.xiehouyu", "model_name": "tongyi:qwen-turbo-latest", "limit": 1000}
 {"lang": "zh_CN", "name": "成语", "extractor": "crawler.xinhua.idiom", "model_name": "tongyi:qwen-turbo-latest"}
 
 {"lang": "zh_CN", "name": "鲁迅", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
@@ -73,30 +169,3 @@
 {"lang": "zh_CN", "name": "毛泽东", "extractor": "crawler.wikiquote.zh", "model_name": "openai:gpt-4o"}
 {"lang": "zh_CN", "name": "孙文", "extractor": "crawler.wikiquote.zh", "model_name": "tongyi:qwen-turbo-latest"}
 
-// en
-
-{"lang": "en", "name": "art", "extractor": "crawler.fortune_mod.art", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "computers", "extractor": "crawler.fortune_mod.computers", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "cookie", "extractor": "crawler.fortune_mod.cookie", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "education", "extractor": "crawler.fortune_mod.education", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "ethnic", "extractor": "crawler.fortune_mod.ethnic", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "food", "extractor": "crawler.fortune_mod.food", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "fortunes", "extractor": "crawler.fortune_mod.fortunes", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "humorists", "extractor": "crawler.fortune_mod.humorists", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "kids", "extractor": "crawler.fortune_mod.kids", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "law", "extractor": "crawler.fortune_mod.law", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "literature", "extractor": "crawler.fortune_mod.literature", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "love", "extractor": "crawler.fortune_mod.love", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "magic", "extractor": "crawler.fortune_mod.magic", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "medicine", "extractor": "crawler.fortune_mod.medicine", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "men-women", "extractor": "crawler.fortune_mod.men-women", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "news", "extractor": "crawler.fortune_mod.news", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "people", "extractor": "crawler.fortune_mod.people", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "pets", "extractor": "crawler.fortune_mod.pets", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "songs-poems", "extractor": "crawler.fortune_mod.songs-poems", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "riddles", "extractor": "crawler.fortune_mod.riddles", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "sports", "extractor": "crawler.fortune_mod.sports", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "startrek", "extractor": "crawler.fortune_mod.startrek", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "tao", "extractor": "crawler.fortune_mod.tao", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "wisdom", "extractor": "crawler.fortune_mod.wisdom", "model_name": "openai:gpt-4o-mini"}
-{"lang": "en", "name": "work", "extractor": "crawler.fortune_mod.work", "model_name": "openai:gpt-4o-mini"}
