@@ -28,50 +28,29 @@
 // {"lang": "en", "name": "work", "extractor": "crawler.fortune_mod.work", "model_name": "openai:gpt-4o-mini"}
 
 {"lang": "en", "name": "Architecture", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-//  329 => 185
 {"lang": "en", "name": "Art", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 59 => 21
 // {"lang": "en", "name": "Artificial_intelligence", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-//  269 => 199
 {"lang": "en", "name": "Books", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-//  70 => 49
 {"lang": "en", "name": "Cats", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 22
 // {"lang": "en", "name": "Computers", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "en", "name": "Cooking", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 83 => 51
 {"lang": "en", "name": "Dogs", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "en", "name": "Eating", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 38
 {"lang": "en", "name": "Education", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini"}
 {"lang": "en", "name": "Food", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 108 => 68
 {"lang": "en", "name": "Fortune", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 22
 // {"lang": "en", "name": "Laozi", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini"}
-// 1581 => 1188
 {"lang": "en", "name": "Love", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 259 => 187
 {"lang": "en", "name": "Music", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 55 => 34
 {"lang": "en", "name": "News", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-//  28
 // {"lang": "en", "name": "Painting", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 16
 // {"lang": "en", "name": "Photography", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 234 => 170
 {"lang": "en", "name": "Poetry", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 49 => 36
 {"lang": "en", "name": "Programming", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 495 => 222
 {"lang": "en", "name": "Religion", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 13
 // {"lang": "en", "name": "Sports", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 137 => 66
 {"lang": "en", "name": "Technology", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 195 => 144
 {"lang": "en", "name": "Wisdom", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
-// 380 => 233
 {"lang": "en", "name": "Work", "extractor": "crawler.wikiquote.en", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
 {"lang": "en", "name": "Daily", "extractor": "crawler.wikiquote.en.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
@@ -92,6 +71,38 @@
 {"lang": "de", "name": "Weisheit", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
 {"lang": "de", "name": "Daily", "extractor": "crawler.wikiquote.de.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+// fr
+
+{"lang": "fr", "name": "Amour", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Art", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Bonheur", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Christianisme", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Communisme", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Dieu", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Europe", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Écrivain", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Œil", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Femme", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Guerre", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Histoire", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Liberté", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Livre", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Lune", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Musique", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Nuit", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Philosophie", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Poésie", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Proverbe", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Poésie", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Religion", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Sagesse", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Sport", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Temps", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Vérité", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Vie", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Vieillesse", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "fr", "name": "Vin", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
 // zh_CN
 

@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -71,6 +71,8 @@ class WikiQuoteCrawler(Crawler):
 
     def parse_element_text(self, element) -> str:
         text = ""
+        if not element:
+            return text
         for content in element.contents:
             if isinstance(content, str):
                 text += content
@@ -90,25 +92,13 @@ class WikiQuoteCrawler(Crawler):
                 continue
             else:
                 continue
+        # clean up
+        text = text.replace("\xa0", " ").replace("\u200b", "").replace("\u00a0", " ")
         return text
 
     def parse_item(self, element) -> Cookie:
-        # 提取名言部分
-        source_element = element.find("dd")
-        if not source_element:
-            source_element = element.find("li")
-        if not source_element:
-            adjacent = element.next_sibling
-            if not adjacent:
-                adjacent = element.parent.next_sibling if element.parent else None
-            if adjacent:
-                if adjacent.name == "dl":
-                    source_element = adjacent.find("dd")
-                elif adjacent.name == "p" and len(adjacent.text.strip()) < 50:
-                    source_element = adjacent
-
         content = self.parse_content(element)
-        source = self.parse_source(source_element)
+        source = self.parse_source(element)
 
         if content and not source:
             # 尝试从 content 中提取 source
@@ -127,8 +117,45 @@ class WikiQuoteCrawler(Crawler):
                 return ""
         return content
 
+    def get_source_find_candidates(self, element) -> List:
+        candidates = []
+        if element.next_sibling:
+            candidates.append(element.next_sibling)
+        if element.parent and element.parent.next_sibling:
+            candidates.append(element.parent.next_sibling)
+        return candidates
+
+    def get_source_finders(self) -> List[Callable]:
+        def find_source_parent_dd(e):
+            candidates = self.get_source_find_candidates(e)
+            for candidate in candidates:
+                if candidate.name == "dl" and candidate.find("dd"):
+                    return candidate.find("dd")
+            return None
+
+        def find_source_parent_p(e):
+            candidates = self.get_source_find_candidates(e)
+            for candidate in candidates:
+                if candidate.name == "p" and len(candidate.text.strip()) < 50:
+                    return candidate
+            return None
+
+        return [
+            lambda e: e.find("dd"),
+            lambda e: e.find("li"),
+            find_source_parent_dd,
+            find_source_parent_p,
+        ]
+
     def parse_source(self, element) -> str:
-        source = self.parse_element_text(element) if element else ""
+        source_element = None
+        for finder in self.get_source_finders():
+            source_element = finder(element)
+            if source_element:
+                break
+        if not source_element:
+            return ""
+        source = self.parse_element_text(source_element) if source_element else ""
         if source:
             for leading in self.source_leadings:
                 source = source.strip().lstrip(leading).strip()
@@ -226,6 +253,13 @@ class WikiQuoteCrawler(Crawler):
                 else:
                     crawler = DeWikiQuoteCrawler()
                     return crawler.crawl(jar)
+            case "crawler", "wikiquote", "fr":
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyFrWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = FrWikiQuoteCrawler()
+                    return crawler.crawl(jar)
             case "crawler", "wikiquote", _:
                 crawler = WikiQuoteCrawler()
                 return crawler.crawl
@@ -258,10 +292,12 @@ class DailyEnWikiQuoteCrawler(EnWikiQuoteCrawler):
 
     def parse_source_from_content(self, content: str) -> Tuple[str, str]:
         leading = "|".join(self.source_leadings)
-        leading = r"(?:\s*(?:" + leading + r")\s*)"
+        leading = r"(?:\s*(?:" + leading + r"))"
         index = r"(?:\d+\.?\s+)?"
         cap_group = r"(.*?)"
-        pattern = r"^" + index + cap_group + leading + cap_group + leading + r"?\s*$"
+        pattern = (
+            r"^" + index + cap_group + leading + r"\s+" + cap_group + leading + r"?\s*$"
+        )
         # print(pattern)
         pattern = re.compile(pattern, re.MULTILINE | re.DOTALL)
         m = pattern.match(content)
@@ -357,6 +393,50 @@ class DailyDeWikiQuoteCrawler(DeWikiQuoteCrawler):
 
         logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
         return cookies
+
+
+class FrWikiQuoteCrawler(WikiQuoteCrawler):
+    whitelist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["whitelist"].default
+        + ["Citations", "Références", "Voir aussi", "Liens externes"],
+    )
+    blacklist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + ["Catégorie", "Portail", "Projet", "Modèle", "Articles connexes"],
+    )
+
+    def parse_list(self, soup) -> List[str]:
+        quotes = []
+        body = soup.select_one("div.mw-parser-output")
+        current_title = ""
+        for item in body.select("div.mw-heading2 h2, div.mw-parser-output .citation"):
+            if item.name == "h2":
+                current_title = item.text
+            if item.name == "div":
+                # if current_title in self.whitelist:
+                if current_title not in self.blacklist:
+                    quotes.append(item)
+        return quotes
+
+    def get_source_finders(self) -> List[Callable]:
+        def find_source_parent_ref(e):
+            if e.parent:
+                candidates = e.parent.select(".mw-parser-output .ref")
+                for candidate in candidates:
+                    if (
+                        candidate.sourceline > e.sourceline
+                        and candidate.sourceline - e.sourceline < 5
+                    ):
+                        return candidate
+            return None
+
+        finders = super().get_source_finders()
+        finders.append(find_source_parent_ref)
+        return finders
+
+
+class DailyFrWikiQuoteCrawler(FrWikiQuoteCrawler):
+    pass
 
 
 class ZhWikiQuoteCrawler(WikiQuoteCrawler):

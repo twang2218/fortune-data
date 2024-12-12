@@ -29,7 +29,7 @@ def process_jar(jar):
         batch_size = 50
         # model_name = "tongyi:qwen-turbo-latest"
         transformers = [
-            FilterByLength(min_length=5, max_length=300),
+            FilterByLength(min_length=5, max_length=500),
             Scorer(model_name=jar.model_name, batch_size=batch_size),
             FilterByScore(score=6.5),
             FilterByRank(top=jar.limit),

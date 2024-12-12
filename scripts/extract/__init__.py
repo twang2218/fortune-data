@@ -7,6 +7,7 @@ from .wikiquote import (
     DailyEnWikiQuoteCrawler,
     DeWikiQuoteCrawler,
     EnWikiQuoteCrawler,
+    FrWikiQuoteCrawler,
     WikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )

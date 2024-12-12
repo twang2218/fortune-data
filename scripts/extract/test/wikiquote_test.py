@@ -1,8 +1,10 @@
 from bs4 import BeautifulSoup
+
 from extract import (
     DailyEnWikiQuoteCrawler,
     DeWikiQuoteCrawler,
     # EnWikiQuoteCrawler,
+    FrWikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
 
@@ -89,6 +91,31 @@ def test_crawler_wikiquote_en_daily():
         element = soup.find("li")
         if not element:
             element = soup.find("dd")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
+
+
+def test_crawler_wikiquote_fr():
+    testcases = [
+        (
+            """<div class="citation" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">L'art d'écrire est un art très futile s'il n'implique pas avant tout l'art de voir le monde comme un potentiel de fiction.</div><ul data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><li data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><div class="ref" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><i data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Littératures</i>&nbsp;(1980), <a href="/wiki/Vladimir_Nabokov" title="Vladimir Nabokov" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Vladimir Nabokov</a>&nbsp;(trad. Hélène Pasquier), éd. Robert Laffont, coll.&nbsp;«&nbsp;Bouquins&nbsp;»,&nbsp;2010, partie Littératures I,&nbsp;Bons lecteurs et bons écrivains,&nbsp;p.&nbsp;36</div></li></ul>""",
+            "L'art d'écrire est un art très futile s'il n'implique pas avant tout l'art de voir le monde comme un potentiel de fiction.",
+            "Littératures (1980), Vladimir Nabokov (trad. Hélène Pasquier), éd. Robert Laffont, coll. « Bouquins », 2010, partie Littératures I, Bons lecteurs et bons écrivains, p. 36",
+        ),
+        (
+            """<div class="citation" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Lorsque la vie débarrasse de l'inessentiel par lequel elle se laisse trop souvent encombrer, elle redonne toutes ses chances à la création&nbsp;: si quelqu'un a jamais été persuadé qu'en art «&nbsp;qui perd gagne&nbsp;», c'est bien Chateaubriand.</div><ul data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">
+<li data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><span class="precisions" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Il est ici question de <a href="/wiki/Fran%C3%A7ois-Ren%C3%A9_de_Chateaubriand" title="François-René de Chateaubriand" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Chateaubriand</a> et de son incarcération.</span></li></ul><ul data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><li data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><div class="ref" data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"> «&nbsp;Les prisons du poète&nbsp;», Philippe Berthier, <i data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">Chateaubriand — Revue Littéraire Europe</i>&nbsp;<small data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">(ISSN&nbsp;0014-2751)</small>, nº&nbsp;775-776,&nbsp;Novembre-décembre 1993, p.&nbsp;70</div></li></ul><p data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9"><br data-immersive-translate-walked="708b90e4-2325-4fa1-829c-84ae25b191a9">
+</p>""",
+            "Lorsque la vie débarrasse de l'inessentiel par lequel elle se laisse trop souvent encombrer, elle redonne toutes ses chances à la création : si quelqu'un a jamais été persuadé qu'en art « qui perd gagne », c'est bien Chateaubriand.",
+            "« Les prisons du poète », Philippe Berthier, Chateaubriand — Revue Littéraire Europe , nº 775-776, Novembre-décembre 1993, p. 70",
+        ),
+    ]
+
+    crawler = FrWikiQuoteCrawler()
+    for html, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find("div")
         cookie = crawler.parse_item(element)
         assert cookie.content == content
         assert cookie.source == source
