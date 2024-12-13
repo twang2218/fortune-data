@@ -16,8 +16,10 @@ test:
 clean:
 	ruff clean
 	rm -rf .pytest_cache
-	rm -rf .venv
 	find scripts -type d -name __pycache__ -exec rm -rf {} \+
+
+clean-all: clean clean-data
+	rm -rf .venv
 
 clean-data:
 	rm -rf cookies

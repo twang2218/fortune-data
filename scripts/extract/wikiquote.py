@@ -71,7 +71,10 @@ class WikiQuoteCrawler(Crawler):
     def parse_list(self, soup) -> List[str]:
         quotes = []
 
-        selector = ', '.join([f"{self.css_body} {item[1]}" for item in self.css_items])
+        selectors = [f"{self.css_body} {self.css_header}"] + [
+            f"{self.css_body} {item[1]}" for item in self.css_items
+        ]
+        selector = ", ".join(selectors)
         current_title = ""
         for item in soup.select(selector):
             if item.name == "h2":
@@ -495,7 +498,7 @@ class ZhWikiQuoteCrawler(WikiQuoteCrawler):
     )
     blacklist: List[str] = Field(
         default=WikiQuoteCrawler.model_fields["blacklist"].default
-        + ["模板", "分类", "帮助", "MediaWiki", "Wikiquote", "参见", "参考文献"],
+        + ["参见", "参考文献", "注释及参考资料", "链接", "外部链接", "相关条目", "相关人士语录", "相关语录"],
     )
     source_leadings: List[str] = Field(
         default=WikiQuoteCrawler.model_fields["source_leadings"].default
@@ -517,9 +520,6 @@ class ZhWikiQuoteCrawler(WikiQuoteCrawler):
         default=WikiQuoteCrawler.model_fields["quotation_marks_right"].default
         + ["」", "』", "》", "】", "〉", "〕", "〗"],
     )
-
-    def format_url(self, jar: CookieJar) -> str:
-        return self.base_url.format(title=jar.name, lang="zh")
 
     def process_source(self, cookies: List[Cookie], jar: CookieJar) -> List[Cookie]:
         for cookie in cookies:

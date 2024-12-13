@@ -1,5 +1,5 @@
 [project]
-name = "scripts"
+name = "fortune-data"
 version = "0.1.0"
 description = "scripts for preprocessing fortune cookies"
 readme = "README.md"
