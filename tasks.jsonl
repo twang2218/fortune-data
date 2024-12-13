@@ -29,6 +29,27 @@
 
 {"lang": "en", "name": "Daily", "extractor": "crawler.wikiquote.en.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
+// es
+
+{"lang": "es", "name": "Amor", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Arquitectura", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Arte", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Libro", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Gato", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Cocinar", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Perro", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Alimento", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Educación", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Fortuna", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Música", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Noticia", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Pintura", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Poesía", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Religión", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "es", "name": "Sabiduría", "extractor": "crawler.wikiquote.es", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+{"lang": "es", "name": "Daily", "extractor": "crawler.wikiquote.es.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
 // de
 
 {"lang": "de", "name": "Buch", "extractor": "crawler.wikiquote.de", "model_name": "openai:gpt-4o-mini", "is_category": true}

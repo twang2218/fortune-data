@@ -56,7 +56,7 @@ class MingJuCrawler(Crawler):
                     author="",
                     content=self.get_content(links[0]),
                     source="",
-                    link=self.get_link(links[0]),
+                    link=self.get_link(links[0].get("href")),
                 )
                 if cookie.title and "《" not in cookie.title:
                     cookie.title = f"《{cookie.title}》"
@@ -99,7 +99,7 @@ class GuShiCrawler(Crawler):
 
         cookies = []
         for element in self.parse_list(body):
-            link = self.get_link(element)
+            link = self.get_link(element.get("href"))
             link_body = self.get_page(link)
             cookie = self.parse_item(link_body)
             if not cookie:
@@ -171,7 +171,7 @@ class ShiWenCrawler(GuShiCrawler):
 
         cookies = []
         for element in self.parse_list(body):
-            link = self.get_link(element)
+            link = self.get_link(element.get("href"))
             link_body = self.get_page(link)
             cookie = self.parse_item(link_body)
             if not cookie:

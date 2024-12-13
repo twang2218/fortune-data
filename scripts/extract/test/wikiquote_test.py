@@ -3,11 +3,48 @@ from extract import (
     DailyEnWikiQuoteCrawler,
     DeWikiQuoteCrawler,
     # EnWikiQuoteCrawler,
+    DailyEsWikiQuoteCrawler,
     FrWikiQuoteCrawler,
     RuWikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
 
+def test_crawler_wikiquote_es():
+    testcases = [
+        (
+            """<div id="toc" style="padding:10px; font-size:101%; width:100%; box-sizing:border-box; background-color:#f4f4F5; -moz-border-radius:10px"> 
+  <table style="border-collapse: collapse;" border="0" width="100%" bgcolor="#F4F4F5">
+    <tbody><tr>
+      
+      <td style="vertical-align:top" width="34px">
+        <figure class="mw-halign-right" typeof="mw:File"><span title="«"><img alt="«" src="//upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Left_pointing_double_angle_quotation_mark_sh1.svg/36px-Left_pointing_double_angle_quotation_mark_sh1.svg.png" decoding="async" width="36" height="39" class="mw-file-element" srcset="//upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Left_pointing_double_angle_quotation_mark_sh1.svg/54px-Left_pointing_double_angle_quotation_mark_sh1.svg.png 1.5x, //upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Left_pointing_double_angle_quotation_mark_sh1.svg/72px-Left_pointing_double_angle_quotation_mark_sh1.svg.png 2x" data-file-width="320" data-file-height="350"></span><figcaption> «&nbsp;</figcaption></figure>
+      </td>
+      <td width="100%">
+        <div style="text-align:center; font-weight: bold; color: #090960;">El que busca la verdad corre el riesgo de encontrarla</div>
+      </td>
+      <td style="vertical-align:bottom" width="34px">
+        <figure class="mw-halign-left" typeof="mw:File"><span title="»"><img alt="»" src="//upload.wikimedia.org/wikipedia/commons/thumb/d/de/Right_pointing_double_angle_quotation_mark_sh1.svg/36px-Right_pointing_double_angle_quotation_mark_sh1.svg.png" decoding="async" width="36" height="39" class="mw-file-element" srcset="//upload.wikimedia.org/wikipedia/commons/thumb/d/de/Right_pointing_double_angle_quotation_mark_sh1.svg/54px-Right_pointing_double_angle_quotation_mark_sh1.svg.png 1.5x, //upload.wikimedia.org/wikipedia/commons/thumb/d/de/Right_pointing_double_angle_quotation_mark_sh1.svg/72px-Right_pointing_double_angle_quotation_mark_sh1.svg.png 2x" data-file-width="320" data-file-height="350"></span><figcaption>&nbsp;» </figcaption></figure>
+      </td>
+    </tr>
+    <tr>
+        <td colspan="3" height="100%">
+          <div style="text-align:right"><a href="/wiki/Isabel_Allende" title="Isabel Allende">Isabel Allende</a><br><small></small></div>
+        </td>
+      </tr>
+  </tbody></table>
+</div>""",
+            "El que busca la verdad corre el riesgo de encontrarla",
+            "Isabel Allende",
+        ),
+    ]
+
+    crawler = DailyEsWikiQuoteCrawler()
+    for html, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find("div")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
 
 def test_crawler_wikiquote_de():
     testcases = [

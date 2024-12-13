@@ -77,8 +77,8 @@ class Crawler(BaseModel):
         return element.text.strip()
 
     def get_link(self, link) -> str:
-        if link and link.has_attr("href"):
-            return urljoin(self.base_url, link["href"])
+        if self.base_url and link:
+            return urljoin(self.base_url, link)
         return None
 
     def parse_item(self, element) -> Cookie:

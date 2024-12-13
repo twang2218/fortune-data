@@ -79,6 +79,7 @@ class WikiQuoteCrawler(Crawler):
         for item in soup.select(selector):
             if item.name == "h2":
                 current_title = item.text
+                continue
             if current_title not in self.blacklist:
                 for tag, _ in self.css_items:
                     if item.name == tag:
@@ -230,7 +231,7 @@ class WikiQuoteCrawler(Crawler):
         quotes = agent.process([cookie.content for cookie in cookies_without_source])
         for i, quote in enumerate(quotes):
             cookie = cookies_without_source[i]
-            if isinstance(quote, Quote):
+            if isinstance(quote, Quote) and quote.source.strip():
                 cookie.content = quote.quote.strip()
                 cookie.source = quote.source.strip()
             else:
@@ -267,6 +268,13 @@ class WikiQuoteCrawler(Crawler):
                     return crawler.crawl(jar)
                 else:
                     crawler = EnWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+            case "crawler", "wikiquote", "es":
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyEsWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = EsWikiQuoteCrawler()
                     return crawler.crawl(jar)
             case "crawler", "wikiquote", "de":
                 if len(parts) > 3 and parts[3] == "daily":
@@ -351,6 +359,105 @@ class DailyEnWikiQuoteCrawler(EnWikiQuoteCrawler):
 
         logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
         return cookies
+
+
+class EsWikiQuoteCrawler(WikiQuoteCrawler):
+    blacklist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + ["Categoría", "Enlaces externos", "Referencias", "Véase también", "Bibliografía"],
+    )
+
+    def parse_content(self, element) -> str:
+        content = super().parse_content(element)
+        if "«" in content and "»" in content:
+            content = content.replace("«", "").replace("»", "")
+        return content.strip()
+
+class DailyEsWikiQuoteCrawler(EsWikiQuoteCrawler):
+    base_url: str = Field(
+        default="https://es.wikiquote.org/wiki/Wikiquote:Archivo_de_la_Frase_célebre_del_día"
+    )
+
+    css_items: List[Tuple[str, str]] = Field(
+        default=[
+            ("li", "> ul > li"),
+            ("div", "> div#toc"),
+        ],
+        description="The CSS selector for the items in the page.",
+    )
+
+    def parse_content(self, element) -> str:
+        rows = element.select("tbody tr")
+        if not rows:
+            return ""
+
+        # the first row is the quote
+        row = rows[0]
+        for element in row.select("td div:not(:has(> span))"):
+            if element.text.strip():
+                content = super().parse_content(element)
+                return content
+        return ""
+    
+    def get_source_finders(self) -> List[Callable]:
+        def find_source_parent_td(e):
+            rows = e.select("tbody tr")
+            if not rows:
+                return None
+            if len(rows) < 2:
+                return None
+            # the second row is the source
+            row = rows[1]
+            for element in row.select("td div"):
+                if element.text.strip():
+                    return element
+            return None
+        
+        def find_source_parent_div(e):
+            rows = e.select("td div:not(:has(> span))")
+            if not rows:
+                return None
+            if len(rows) > 1:
+                return rows[1]
+            return None
+
+        finders = super().get_source_finders()
+        finders.insert(0, find_source_parent_td)
+        finders.insert(1, find_source_parent_div)
+        return finders
+
+    def crawl(self, jar: CookieJar) -> List[Cookie]:
+        logger.info(f"开始爬取 《{jar.name}》")
+        cookies = []
+
+        jar.link = self.base_url
+        soup = self.get_page(jar.link)
+        if not soup:
+            return cookies
+        
+        for item in soup.select("div.mw-parser-output > p > a"):
+            url = item.get("href")
+            if not url:
+                continue
+            # if 'junio/2005' not in url:
+            # if 'octubre/2007' not in url:
+            #     continue
+            logger.debug(f"爬取 sub_page: {url}")
+            url = self.get_link(url)
+            sub_page = self.get_page(url)
+            if not sub_page:
+                continue
+            for sub_item in self.parse_list(sub_page):
+                cookie = self.parse_item(sub_item)
+                if cookie.content:
+                    cookie.link = url
+                    cookies.append(cookie)
+
+        cookies = self.process_cookies(cookies, jar)
+
+        logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
+        return cookies
+
 
 
 class DeWikiQuoteCrawler(WikiQuoteCrawler):
@@ -498,7 +605,16 @@ class ZhWikiQuoteCrawler(WikiQuoteCrawler):
     )
     blacklist: List[str] = Field(
         default=WikiQuoteCrawler.model_fields["blacklist"].default
-        + ["参见", "参考文献", "注释及参考资料", "链接", "外部链接", "相关条目", "相关人士语录", "相关语录"],
+        + [
+            "参见",
+            "参考文献",
+            "注释及参考资料",
+            "链接",
+            "外部链接",
+            "相关条目",
+            "相关人士语录",
+            "相关语录",
+        ],
     )
     source_leadings: List[str] = Field(
         default=WikiQuoteCrawler.model_fields["source_leadings"].default
