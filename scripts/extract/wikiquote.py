@@ -1,10 +1,9 @@
 import re
 from typing import Callable, List, Tuple
 
+from common import Agent, Cookie, CookieJar
 from loguru import logger
 from pydantic import BaseModel, Field
-
-from common import Agent, Cookie, CookieJar
 
 from .crawler import Crawler
 

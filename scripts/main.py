@@ -1,13 +1,14 @@
 import argparse
 import os
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
+from pathlib import Path
 
+from common import Agent, CookieJar
 from dotenv import load_dotenv
-from loguru import logger
-
-from common import CookieJar
-from extract import Extractor
+from extract import Crawler, Extractor
 from load import CookieDB, Jsonl
+from loguru import logger
 from transform import (
     ChineseConverter,
     FilterByLength,
@@ -17,11 +18,11 @@ from transform import (
 )
 
 
-def process_jar(jar):
+def process_jar(jar, base_dir: str = "data"):
     try:
         # Extract
         cookies = Extractor.extract(jar)
-        location = os.path.join("data", "extract", jar.lang)
+        location = os.path.join(base_dir, "raw", "crawled", jar.lang)
         s = Jsonl(name=jar.name, location=location)
         s.save(cookies)
 
@@ -41,12 +42,13 @@ def process_jar(jar):
 
         for transformer in transformers:
             cookies = transformer.transform(cookies)
-        location = os.path.join("data", "transform", jar.lang)
+        location = os.path.join(base_dir, "raw", "processed", jar.lang)
         s = Jsonl(name=jar.name, location=location)
         s.save(cookies)
 
         # Load
-        location = os.path.join("data", "load", "packaged", jar.lang)
+        # tier2
+        location = os.path.join(base_dir, "tier2", jar.lang)
         s = CookieDB(name=jar.name, location=location, dat_file=False)
         s.save(cookies)
         logger.info(
@@ -61,22 +63,28 @@ def main():
     load_dotenv()
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_path",
+        "task_file",
         type=str,
         nargs="?",
+        help="Path to the task file.",
         default="tasks.jsonl",
-        help="Path to the input JSON file.",
     )
-    # parser.add_argument(
-    #     "output_path",
-    #     type=str,
-    #     nargs="?",
-    #     help="Path to the output cookie file. default is the input_file",
-    # )
+    parser.add_argument(
+        "output_path",
+        type=str,
+        nargs="?",
+        default="cookies",
+        help="Path to the output cookie file. default is the input_file",
+    )
     args = parser.parse_args()
 
+    # setup cache
+    cache_dir = Path(".cache").resolve()
+    Agent.init_cache(cache_dir)
+    Crawler.init_cache(cache_dir)
+
     jars = []
-    with open(args.input_path, "r") as f:
+    with open(args.task_file, "r") as f:
         for line in f.readlines():
             line = line.strip()
             if not line or line.startswith("//"):
@@ -86,16 +94,17 @@ def main():
             if jar.name:
                 jars.append(jar)
 
+    process_jar_with_output_path = partial(process_jar, base_dir=args.output_path)
     with ThreadPoolExecutor(max_workers=5) as executor:
-        executor.map(process_jar, jars)
+        executor.map(process_jar_with_output_path, jars)
 
-    # embedded
-    logger.info("Processing embedded cookies")
+    # tier1
+    logger.info("Processing tier1 cookies")
     cookies = {}
     for jar in jars:
         if jar.lang not in cookies:
             cookies[jar.lang] = []
-        location = os.path.join("data", "transform", jar.lang)
+        location = os.path.join(args.output_path, "raw", "processed", jar.lang)
         s = Jsonl(name=jar.name, location=location)
         try:
             cookies[jar.lang].extend(s.load())
@@ -108,9 +117,10 @@ def main():
     for lang, lang_cookies in cookies.items():
         for transformer in transformers:
             lang_cookies = transformer.transform(lang_cookies)
-        location = os.path.join("data", "load", "embedded", lang)
-        s = CookieDB(name=lang, location=location, dat_file=True)
+        location = os.path.join(args.output_path, "tier1")
+        s = CookieDB(name=lang, location=location, dat_file=False)
         s.save(lang_cookies)
+        logger.info(f"[tier1] '{lang}': {len(lang_cookies)} cookies.")
 
 
 if __name__ == "__main__":

@@ -3,10 +3,9 @@ import subprocess
 from pathlib import Path
 from typing import List
 
+from common import Cookie
 from loguru import logger
 from pydantic import Field
-
-from common import Cookie
 
 from .loader import Loader
 

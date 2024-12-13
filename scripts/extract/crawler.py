@@ -1,23 +1,16 @@
 import random
 import time
+from pathlib import Path
 from typing import List
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
+from common import Cookie, CookieJar
 from loguru import logger
 from pydantic import BaseModel, Field
 from requests_cache import AnyResponse, CachedSession
 
-from common import Cookie, CookieJar
-
-# 设置缓存，有效期为1个月
-# requests_cache.install_cache(
-#     "data/cache/crawler.db", backend="sqlite", expire_after=86400 * 30
-# )
-
-session = CachedSession(
-    "data/cache/crawler.db", backend="sqlite", expire_after=86400 * 30
-)
+session = None
 
 
 class Crawler(BaseModel):
@@ -37,6 +30,7 @@ class Crawler(BaseModel):
 
     def get_response(self, url) -> AnyResponse:
         """获取页面 Response 对象"""
+        global session
         try:
             # 对于已经缓存的请求，不再延迟；对于新请求，随机延迟一段时间
             if not session.cache.contains(url=url):
@@ -87,10 +81,6 @@ class Crawler(BaseModel):
             return urljoin(self.base_url, link["href"])
         return None
 
-    def remove_link_from_cache(self, url):
-        logger.debug(f"Removing {url} from crawler cache")
-        session.cache.delete(urls=[url])
-
     def parse_item(self, element) -> Cookie:
         raise NotImplementedError
 
@@ -122,3 +112,28 @@ class Crawler(BaseModel):
                 return ForturnModCrawler.extract(jar)
             case _:
                 raise NotImplementedError
+
+    @staticmethod
+    def init_cache(cache_dir: str = None):
+        global session
+        if not cache_dir:
+            cache_dir = str(Path(__file__).parent.parent / ".cache" / "crawler.db")
+        else:
+            cache_dir = str(Path(cache_dir) / "crawler.db")
+        logger.debug(f"Crawler cache: {cache_dir}")
+        session = CachedSession(cache_dir, backend="sqlite", expire_after=86400 * 30)
+
+    @staticmethod
+    def remove_link_from_cache(url):
+        global session
+        if not session:
+            return
+        logger.debug(f"Removing {url} from crawler cache")
+        session.cache.delete(urls=[url])
+
+    @staticmethod
+    def exists_in_cache(url):
+        global session
+        if not session:
+            return False
+        return session.cache.contains(url=url)

@@ -1,8 +1,7 @@
 from typing import List
 
-from pydantic import BaseModel, Field
-
 from common import Cookie
+from pydantic import BaseModel, Field
 
 
 class Loader(BaseModel):

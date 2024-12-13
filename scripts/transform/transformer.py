@@ -1,8 +1,7 @@
 from typing import List
 
-from pydantic import BaseModel
-
 from common import Cookie
+from pydantic import BaseModel
 
 
 class Transformer(BaseModel):

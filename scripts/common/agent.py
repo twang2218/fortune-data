@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from pathlib import Path
 from typing import Any, List, Type
 
 from langchain.globals import set_llm_cache
@@ -13,8 +14,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from loguru import logger
 from pydantic import BaseModel, Field, SecretStr
 
-LANGCHAIN_DB_PATH = "data/cache/langchain.db"
-set_llm_cache(SQLiteCache(database_path=LANGCHAIN_DB_PATH))
+langchain_cache_dir = None
 
 
 class Agent(BaseModel):
@@ -95,7 +95,7 @@ class Agent(BaseModel):
             raise inputs["exception"]
         else:
             # remove llm call cache for the failed call
-            remove_from_cache(inputs["content"])
+            Agent.remove_from_cache(inputs["content"])
         # Add historical messages to the original input, so the model knows that it made a mistake with the last tool call.
         messages = [
             AIMessage(content=str(inputs.pop("exception"))),
@@ -122,6 +122,41 @@ class Agent(BaseModel):
             results.extend(batch_results)
         # return the results
         return results
+
+    @staticmethod
+    def init_cache(cache_dir: str = None):
+        global langchain_cache_dir
+        if not cache_dir:
+            langchain_cache_dir = str(
+                Path(__file__).parent.parent / ".cache" / "langchain.db"
+            )
+        else:
+            langchain_cache_dir = str(Path(cache_dir) / "langchain.db")
+        logger.debug(f"Langchain cache: {langchain_cache_dir}")
+        set_llm_cache(SQLiteCache(database_path=langchain_cache_dir))
+
+    @staticmethod
+    def remove_from_cache(pattern: str):
+        global langchain_cache_dir
+        with sqlite3.connect(langchain_cache_dir) as conn:
+            try:
+                c = conn.cursor()
+                sql = "DELETE FROM full_llm_cache WHERE prompt LIKE ?"
+                # link = requote_uri(link)
+                if "\n" in pattern:
+                    parts = pattern.split("\n")
+                    parts = [part.strip() for part in parts if len(part.strip()) > 0]
+                    pattern = parts[0]
+                pattern_encoded = pattern.encode("unicode_escape").decode("ascii")
+                c.execute(sql, (f"%{pattern_encoded}%",))
+                delete_count = c.rowcount
+                conn.commit()
+                logger.debug(
+                    f"Removed {delete_count} records for {pattern} from langchain cache"
+                )
+            except Exception as e:
+                logger.error(f"Error removing {pattern} from langchain cache: {str(e)}")
+                conn.rollback()
 
 
 def load_model(model_name: str = "openai:gpt-4o") -> BaseChatModel:
@@ -154,27 +189,3 @@ def load_model(model_name: str = "openai:gpt-4o") -> BaseChatModel:
     # elif provider == "anthropic":
     #     m = ChatAnthropic(model_name=model_name, timeout=60, stop=None)
     return m
-
-
-def remove_from_cache(pattern: str):
-    try:
-        conn = sqlite3.connect(LANGCHAIN_DB_PATH)
-        c = conn.cursor()
-        sql = "DELETE FROM full_llm_cache WHERE prompt LIKE ?"
-        # link = requote_uri(link)
-        if "\n" in pattern:
-            parts = pattern.split("\n")
-            parts = [part.strip() for part in parts if len(part.strip()) > 0]
-            pattern = parts[0]
-        pattern_encoded = pattern.encode("unicode_escape").decode("ascii")
-        c.execute(sql, (f"%{pattern_encoded}%",))
-        delete_count = c.rowcount
-        conn.commit()
-        logger.debug(
-            f"Removed {delete_count} records for {pattern} from langchain cache"
-        )
-    except Exception as e:
-        logger.error(f"Error removing {pattern} from langchain cache: {str(e)}")
-    finally:
-        if conn:
-            conn.close()

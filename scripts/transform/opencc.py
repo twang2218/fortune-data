@@ -1,9 +1,8 @@
 from typing import Any, List
 
+from common import Cookie
 from opencc import OpenCC
 from pydantic import Field
-
-from common import Cookie
 
 from .transformer import Transformer
 

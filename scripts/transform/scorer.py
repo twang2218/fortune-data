@@ -1,8 +1,7 @@
 from typing import List
 
-from pydantic import Field
-
 from common import Agent, Cookie, Score
+from pydantic import Field
 
 from .transformer import Transformer
 
