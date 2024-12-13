@@ -50,6 +50,18 @@ class WikiQuoteCrawler(Crawler):
         default=["'", "”", "’"],
         description="The right quotation marks to remove from the quote text.",
     )
+    css_body: str = Field(
+        default="div.mw-parser-output",
+        description="The CSS selector for the body of the page.",
+    )
+    css_header: str = Field(
+        default="div.mw-heading2 h2",
+        description="The CSS selector for the headers in the page.",
+    )
+    css_items: List[Tuple[str, str]] = Field(
+        default=[("li", "> ul > li")],
+        description="The CSS selector for the items in the page.",
+    )
 
     def format_url(self, jar: CookieJar) -> str:
         parts = jar.extractor.split(".")
@@ -58,15 +70,16 @@ class WikiQuoteCrawler(Crawler):
 
     def parse_list(self, soup) -> List[str]:
         quotes = []
-        body = soup.select_one("div.mw-parser-output")
+
+        selector = ', '.join([f"{self.css_body} {item[1]}" for item in self.css_items])
         current_title = ""
-        for item in body.select("div.mw-heading2 h2, div.mw-parser-output > ul > li"):
+        for item in soup.select(selector):
             if item.name == "h2":
                 current_title = item.text
-            if item.name == "li":
-                # if current_title in self.whitelist:
-                if current_title not in self.blacklist:
-                    quotes.append(item)
+            if current_title not in self.blacklist:
+                for tag, _ in self.css_items:
+                    if item.name == tag:
+                        quotes.append(item)
         return quotes
 
     def parse_element_text(self, element) -> str:
@@ -182,9 +195,9 @@ class WikiQuoteCrawler(Crawler):
         return content, ""
 
     def crawl(self, jar: CookieJar) -> List[Cookie]:
-        logger.info(f"开始爬取 《{jar.name}》")
         cookies = []
         jar.link = self.format_url(jar)
+        logger.info(f"开始爬取 [{jar.lang}] 《{jar.name}》: {jar.link}")
         soup = self.get_page(jar.link)
         if not soup:
             return cookies
@@ -197,7 +210,7 @@ class WikiQuoteCrawler(Crawler):
 
         cookies = self.process_cookies(cookies, jar)
 
-        logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
+        logger.info(f"爬取 [{jar.lang}] 《{jar.name}》完成，共 {len(cookies)} 条名言")
         return cookies
 
     def process_content_by_llm(
@@ -290,18 +303,12 @@ class DailyEnWikiQuoteCrawler(EnWikiQuoteCrawler):
     base_url: str = Field(
         default="https://en.wikiquote.org/wiki/Wikiquote:Quote_of_the_Day"
     )
-
-    def parse_list(self, soup) -> List[str]:
-        quotes = []
-        body = soup.select_one("div.mw-parser-output")
-        for item in body.select("div.mw-parser-output > dl > dd") + body.select(
-            "div.mw-parser-output > ol > li"
-        ):
-            quotes.append(item)
-        return quotes
-
-    def parse_item(self, element) -> Cookie:
-        return super().parse_item(element)
+    css_items: List[Tuple[str, str]] = Field(
+        default=[
+            ("dd", "> dl > dd"),
+            ("li", "> ol > li"),
+        ]
+    )
 
     def parse_source_from_content(self, content: str) -> Tuple[str, str]:
         leading = "|".join(self.source_leadings)
@@ -417,19 +424,11 @@ class FrWikiQuoteCrawler(WikiQuoteCrawler):
         default=WikiQuoteCrawler.model_fields["blacklist"].default
         + ["Catégorie", "Portail", "Projet", "Modèle", "Articles connexes"],
     )
-
-    def parse_list(self, soup) -> List[str]:
-        quotes = []
-        body = soup.select_one("div.mw-parser-output")
-        current_title = ""
-        for item in body.select("div.mw-heading2 h2, div.mw-parser-output .citation"):
-            if item.name == "h2":
-                current_title = item.text
-            if item.name == "div":
-                # if current_title in self.whitelist:
-                if current_title not in self.blacklist:
-                    quotes.append(item)
-        return quotes
+    css_items: List[Tuple[str, str]] = Field(
+        default=[
+            ("div", ".citation"),
+        ]
+    )
 
     def get_source_finders(self) -> List[Callable]:
         def find_source_parent_ref(e):
@@ -457,24 +456,12 @@ class RuWikiQuoteCrawler(WikiQuoteCrawler):
         default=WikiQuoteCrawler.model_fields["blacklist"].default
         + ["См. также", "Примечания", "Литература", "Ссылки"],
     )
-
-    def parse_list(self, soup) -> List[str]:
-        quotes = []
-        body = soup.select_one("div.mw-parser-output")
-        current_title = ""
-        for item in body.select(
-            "div.mw-heading2 h2, table.q, div.mw-parser-output > ul > li"
-        ):
-            if item.name == "h2":
-                current_title = item.text
-            elif item.name == "li":
-                # if current_title in self.whitelist:
-                if current_title not in self.blacklist:
-                    quotes.append(item)
-            elif item.name == "table":
-                if current_title not in self.blacklist:
-                    quotes.append(item)
-        return quotes
+    css_items: List[Tuple[str, str]] = Field(
+        default=[
+            ("table", "table.q"),
+            ("li", "> ul > li"),
+        ]
+    )
 
     def parse_content(self, element) -> str:
         content_element = element.select_one("tr.q-text .poem")

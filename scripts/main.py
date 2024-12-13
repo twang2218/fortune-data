@@ -52,10 +52,10 @@ def process_jar(jar, base_dir: str = "data"):
         s = CookieDB(name=jar.name, location=location, dat_file=False)
         s.save(cookies)
         logger.info(
-            f"Completed: '{jar.name}': {stats_crawled} cookies retrieved => {len(cookies)} cookies saved."
+            f"Completed: [{jar.lang}] '{jar.name}': {stats_crawled} cookies retrieved => {len(cookies)} cookies saved."
         )
     except Exception as e:
-        logger.error(f"Failed processing '{jar.name}' failed: {e}")
+        logger.error(f"Failed processing [{jar.lang}] '{jar.name}' failed: {e}")
         logger.exception(e)
 
 

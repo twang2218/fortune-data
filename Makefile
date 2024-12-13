@@ -19,7 +19,7 @@ clean:
 	rm -rf .venv
 	find scripts -type d -name __pycache__ -exec rm -rf {} \+
 
-clean-cookies:
+clean-data:
 	rm -rf cookies
 
 clean-cache:

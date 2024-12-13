@@ -104,6 +104,33 @@
 {"lang": "fr", "name": "Vieillesse", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "fr", "name": "Vin", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
+// ru
+
+{"lang": "ru", "name": "Daily", "extractor": "crawler.wikiquote.ru.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+{"lang": "ru", "name": "Антропогенез", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Гуманизм", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Здоровье", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Искусство", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "История", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Культура", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Мифология", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Мужчина_и_женщина", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Наука", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Общение", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Общество", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Разум", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Рассудок", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Религия", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Техника", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Технология", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Философия", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Цивилизация", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Человечество", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Чувство", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Этика", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+
 // zh_CN
 
 {"lang": "zh_CN", "name": "论语", "extractor": "crawler.gushiwen.mingju.tstr", "model_name": "tongyi:qwen-turbo-latest"}
