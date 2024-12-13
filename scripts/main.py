@@ -25,6 +25,8 @@ def process_jar(jar):
         s = Jsonl(name=jar.name, location=location)
         s.save(cookies)
 
+        stats_crawled = len(cookies)
+
         # Transform
         batch_size = 50
         # model_name = "tongyi:qwen-turbo-latest"
@@ -47,9 +49,11 @@ def process_jar(jar):
         location = os.path.join("data", "load", "packaged", jar.lang)
         s = CookieDB(name=jar.name, location=location, dat_file=False)
         s.save(cookies)
-        logger.info(f"Processing '{jar.name}' completed. {len(cookies)} cookies saved.")
+        logger.info(
+            f"Completed: '{jar.name}': {stats_crawled} cookies retrieved => {len(cookies)} cookies saved."
+        )
     except Exception as e:
-        logger.error(f"Processing '{jar.name}' failed: {e}")
+        logger.error(f"Failed processing '{jar.name}' failed: {e}")
         logger.exception(e)
 
 

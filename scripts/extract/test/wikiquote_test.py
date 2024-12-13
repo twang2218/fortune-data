@@ -5,6 +5,7 @@ from extract import (
     DeWikiQuoteCrawler,
     # EnWikiQuoteCrawler,
     FrWikiQuoteCrawler,
+    RuWikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
 
@@ -116,6 +117,49 @@ def test_crawler_wikiquote_fr():
     for html, content, source in testcases:
         soup = BeautifulSoup(html, "html5lib")
         element = soup.find("div")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
+
+
+def test_crawler_wikiquote_ru():
+    testcases = [
+        (
+            """<table class="q" cellspacing="0" style="background-color:transparent;color:inherit;text-align:left;">
+
+<tbody><tr class="q-text">
+<td valign="top" style="width:1em;"><ul style="margin-top:-0.5ex;"><li>&nbsp;</li></ul></td>
+<td><div style="margin-top:-1ex;margin-bottom:-1ex" class="poem">
+<p>Есть две бесконечные вещи — Вселенная и человеческая глупость. Впрочем, насчёт Вселенной я не уверен.
+</p>
+</div>
+</td></tr>
+<tr class="q-author">
+<td>&nbsp;
+</td>
+<td style="padding-left:5ex;padding-bottom:1ex">— <a href="/wiki/%D0%90%D0%BB%D1%8C%D0%B1%D0%B5%D1%80%D1%82_%D0%AD%D0%B9%D0%BD%D1%88%D1%82%D0%B5%D0%B9%D0%BD" title="Альберт Эйнштейн">Альберт Эйнштейн</a></td></tr></tbody></table>""",
+            "table",
+            "Есть две бесконечные вещи — Вселенная и человеческая глупость. Впрочем, насчёт Вселенной я не уверен.",
+            "Альберт Эйнштейн",
+        ),
+        (
+            """<li>Единственная красота, которую я знаю,&nbsp;— это здоровье. (<a href="/wiki/%D0%93%D0%B5%D0%BD%D1%80%D0%B8%D1%85_%D0%93%D0%B5%D0%B9%D0%BD%D0%B5" title="Генрих Гейне">Генрих Гейне</a>)</li>""",
+            "li",
+            "Единственная красота, которую я знаю, — это здоровье.",
+            "Генрих Гейне",
+        ),
+        (
+            """<ul><li>Здоровье народа превыше всего<br>Богатство земли не заменит его<br>Здоровье не купишь&nbsp;— никто не продаст<br>Берегите здоровье как сердце, как глаз.</li></ul><dl><dd><dl><dd><a href="/wiki/%D0%94%D0%B6%D0%B0%D0%BC%D0%B1%D1%83%D0%BB_%D0%94%D0%B6%D0%B0%D0%B1%D0%B0%D0%B5%D0%B2" title="Джамбул Джабаев">Джамбул Джабаев</a></dd></dl></dd></dl>""",
+            "li",
+            "Здоровье народа превыше всего\nБогатство земли не заменит его\nЗдоровье не купишь — никто не продаст\nБерегите здоровье как сердце, как глаз.",
+            "Джамбул Джабаев",
+        ),
+    ]
+
+    crawler = RuWikiQuoteCrawler()
+    for html, tag, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find(tag)
         cookie = crawler.parse_item(element)
         assert cookie.content == content
         assert cookie.source == source

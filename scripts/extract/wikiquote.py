@@ -36,11 +36,11 @@ class WikiQuoteCrawler(Crawler):
         description="The leading characters to remove from the source text.",
     )
     parentheses_left: List[str] = Field(
-        default=["\\[", "\\("],
+        default=[r"\[", r"\("],
         description="The left parentheses to remove from the source text.",
     )
     parentheses_right: List[str] = Field(
-        default=["\\]", "\\)"],
+        default=[r"\]", r"\)"],
         description="The right parentheses to remove from the source text.",
     )
     quotation_marks_left: List[str] = Field(
@@ -53,7 +53,8 @@ class WikiQuoteCrawler(Crawler):
     )
 
     def format_url(self, jar: CookieJar) -> str:
-        _, _, lang = jar.extractor.split(".")
+        parts = jar.extractor.split(".")
+        lang = parts[2]
         return self.base_url.format(title=jar.name.replace(" ", "_"), lang=lang)
 
     def parse_list(self, soup) -> List[str]:
@@ -70,9 +71,12 @@ class WikiQuoteCrawler(Crawler):
         return quotes
 
     def parse_element_text(self, element) -> str:
-        text = ""
         if not element:
-            return text
+            return ""
+        elif isinstance(element, str):
+            return element
+
+        text = ""
         for content in element.contents:
             if isinstance(content, str):
                 text += content
@@ -115,7 +119,7 @@ class WikiQuoteCrawler(Crawler):
             if content.strip().startswith(leading):
                 # it's a source, not a quote
                 return ""
-        return content
+        return content.strip()
 
     def get_source_find_candidates(self, element) -> List:
         candidates = []
@@ -129,8 +133,11 @@ class WikiQuoteCrawler(Crawler):
         def find_source_parent_dd(e):
             candidates = self.get_source_find_candidates(e)
             for candidate in candidates:
-                if candidate.name == "dl" and candidate.find("dd"):
-                    return candidate.find("dd")
+                # select the most inner dd element
+                if candidate.name == "dl" and candidate.select_one(
+                    "dd:not(:has(> dl))"
+                ):
+                    return candidate.select_one("dd:not(:has(> dl))")
             return None
 
         def find_source_parent_p(e):
@@ -159,7 +166,7 @@ class WikiQuoteCrawler(Crawler):
         if source:
             for leading in self.source_leadings:
                 source = source.strip().lstrip(leading).strip()
-        return source
+        return source.strip()
 
     def parse_source_from_content(self, content: str) -> Tuple[str, str]:
         left = "".join([f"{p}" for p in self.parentheses_left])
@@ -259,6 +266,13 @@ class WikiQuoteCrawler(Crawler):
                     return crawler.crawl(jar)
                 else:
                     crawler = FrWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+            case "crawler", "wikiquote", "ru":
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyRuWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = RuWikiQuoteCrawler()
                     return crawler.crawl(jar)
             case "crawler", "wikiquote", _:
                 crawler = WikiQuoteCrawler()
@@ -421,22 +435,71 @@ class FrWikiQuoteCrawler(WikiQuoteCrawler):
     def get_source_finders(self) -> List[Callable]:
         def find_source_parent_ref(e):
             if e.parent:
-                candidates = e.parent.select(".mw-parser-output .ref")
+                candidates = e.parent.select(".ref")
                 for candidate in candidates:
                     if (
-                        candidate.sourceline > e.sourceline
+                        candidate.sourceline >= e.sourceline
                         and candidate.sourceline - e.sourceline < 5
                     ):
                         return candidate
             return None
 
         finders = super().get_source_finders()
-        finders.append(find_source_parent_ref)
+        finders.insert(0, find_source_parent_ref)
         return finders
 
 
 class DailyFrWikiQuoteCrawler(FrWikiQuoteCrawler):
     pass
+
+
+class RuWikiQuoteCrawler(WikiQuoteCrawler):
+    blacklist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + ["См. также", "Примечания", "Литература", "Ссылки"],
+    )
+
+    def parse_list(self, soup) -> List[str]:
+        quotes = []
+        body = soup.select_one("div.mw-parser-output")
+        current_title = ""
+        for item in body.select(
+            "div.mw-heading2 h2, table.q, div.mw-parser-output > ul > li"
+        ):
+            if item.name == "h2":
+                current_title = item.text
+            elif item.name == "li":
+                # if current_title in self.whitelist:
+                if current_title not in self.blacklist:
+                    quotes.append(item)
+            elif item.name == "table":
+                if current_title not in self.blacklist:
+                    quotes.append(item)
+        return quotes
+
+    def parse_content(self, element) -> str:
+        content_element = element.select_one("tr.q-text .poem")
+        if not content_element:
+            content_element = element
+        return super().parse_content(content_element)
+
+    def get_source_finders(self) -> List[Callable]:
+        finders = super().get_source_finders()
+
+        def find_source_td(e):
+            elements = e.select("tr.q-author td")
+            for element in elements:
+                if len(element.text) > 5:
+                    return element
+            return None
+
+        finders.insert(0, find_source_td)
+        return finders
+
+
+class DailyRuWikiQuoteCrawler(RuWikiQuoteCrawler):
+    def format_url(self, jar: CookieJar) -> str:
+        return self.base_url.format(lang="ru", title="Шаблон:Избранная_цитата/Архив")
 
 
 class ZhWikiQuoteCrawler(WikiQuoteCrawler):

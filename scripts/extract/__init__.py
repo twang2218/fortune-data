@@ -5,9 +5,12 @@ from .gushiwen import GuShiCrawler, MingJuCrawler, ShiWenCrawler
 from .wikiquote import (
     DailyDeWikiQuoteCrawler,
     DailyEnWikiQuoteCrawler,
+    DailyFrWikiQuoteCrawler,
+    DailyRuWikiQuoteCrawler,
     DeWikiQuoteCrawler,
     EnWikiQuoteCrawler,
     FrWikiQuoteCrawler,
+    RuWikiQuoteCrawler,
     WikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
