@@ -17,7 +17,6 @@ class Jsonl(Loader):
                 line = line.strip()
                 if not line or line.startswith("//"):
                     continue
-
                 results.append(Cookie.model_validate_json(line))
         return results
 

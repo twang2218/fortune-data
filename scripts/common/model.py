@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -71,7 +71,7 @@ class Cookie(BaseModel):
     )
     # extras: Optional[Dict[str, str]] = Field(default=None, description="extra information")
     link: str = Field(default="", description="link to the content")
-    score: Score = Field(default=None, description="scores of the content")
+    score: Optional[Score] = Field(default=None, description="scores of the content")
 
     def __str__(self):
         source = self.title if self.title else self.source
