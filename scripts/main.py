@@ -99,7 +99,6 @@ def main():
         executor.map(process_jar_with_output_path, jars)
 
     # tier1
-    logger.info("Processing tier1 cookies")
     cookies = {}
     for jar in jars:
         if jar.lang not in cookies:
@@ -110,18 +109,22 @@ def main():
             cookies[jar.lang].extend(s.load())
         except Exception as e:
             logger.error(f"Failed to load {jar.name} for {jar.lang}: {e}")
+
     # Transform
     transformers = [
         FilterByRank(top=500),
     ]
+    logger.info("## tier1")
     for lang, lang_cookies in cookies.items():
         for transformer in transformers:
             lang_cookies = transformer.transform(lang_cookies)
         location = os.path.join(args.output_path, "tier1")
         s = CookieDB(name=lang, location=location, dat_file=False)
         s.save(lang_cookies)
-        logger.info(f"[tier1] '{lang}': {len(lang_cookies)} cookies.")
-
+        logger.info(f"  [tier1] '{lang}': {len(lang_cookies)} cookies.")
+    logger.info("## tier2")
+    for lang, lang_cookies in cookies.items():
+        logger.info(f"  [tier2] '{lang}': {len(lang_cookies)} cookies.")
 
 if __name__ == "__main__":
     main()
