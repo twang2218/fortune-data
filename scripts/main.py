@@ -128,7 +128,8 @@ def process_tier1(jars: list, base_dir: str):
         location = Path(base_dir) / "tier1"
         s = CookieDB(name=lang, location=str(location), dat_file=False)
         s.save(lang_cookies)
-        stats[lang]["tier1"] = len(lang_cookies)
+        if lang in stats:
+            stats[lang]["tier1"] = len(lang_cookies)
 
 
 def load_stats(jars: list, base_dir: str) -> dict:
@@ -166,6 +167,11 @@ def show_stats():
     print()
     print("## Statistics")
     print()
+
+    if len(stats) == 0:
+        print("No stats available.")
+        return
+
     num_jars = 0
     num_crawled = 0
     num_tier1 = 0
@@ -201,7 +207,9 @@ def show_stats():
     print(
         f"| Total tier2   | {num_tier2:6}  |         ({num_tier2/num_crawled*100:4.1f}%)          |"
     )
-    print(f"| Total tier1   | {num_tier1:6}  |         ({num_tier1/num_tier2*100:4.1f}%)          |")
+    print(
+        f"| Total tier1   | {num_tier1:6}  |         ({num_tier1/num_tier2*100:4.1f}%)          |"
+    )
     print()
 
 

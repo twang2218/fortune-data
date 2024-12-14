@@ -6,6 +6,9 @@ generate:
 generate-test:
 	uv run scripts/main.py test.jsonl
 
+generate-stats:
+	uv run scripts/main.py --stats
+
 strfile:
 	find $(COOKIES_DIR)/tier1 -type f ! -name "*.md" -exec strfile {} \;
 	find $(COOKIES_DIR)/tier2 -type f ! -name "*.md" -exec strfile {} \;

@@ -6,6 +6,7 @@ from extract import (
     DailyFrWikiQuoteCrawler,
     DeWikiQuoteCrawler,
     FrWikiQuoteCrawler,
+    JaWikiQuoteCrawler,
     RuWikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
@@ -187,6 +188,35 @@ def test_crawler_wikiquote_fr_daily():
     for html, content, source in testcases:
         soup = BeautifulSoup(html, "html5lib")
         element = soup.find("div")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
+
+
+def test_crawler_wikiquote_ja():
+    testcases = [
+        (
+            """<li>今は<a href="/wiki/%E4%BF%A1%E4%BB%B0" title="信仰">信</a>、<a href="/wiki/%E5%B8%8C%E6%9C%9B" title="希望">望</a>、愛、此の三つのもの存す。其中に最も大いなる者は愛なり。--<a href="/w/index.php?title=%E3%83%91%E3%82%A6%E3%83%AD&amp;action=edit&amp;redlink=1" class="new" title="「パウロ」 (存在しないページ)">パウロ</a>『<a href="/wiki/%E3%82%B3%E3%83%AA%E3%83%B3%E3%83%88%E3%81%AE%E4%BF%A1%E5%BE%92%E3%81%B8%E3%81%AE%E6%89%8B%E7%B4%99%E4%B8%80" class="mw-redirect" title="コリントの信徒への手紙一">コリントの信徒への手紙一</a>』（コリント前書）13:13、正教会訳。</li>""",
+            "今は信、望、愛、此の三つのもの存す。其中に最も大いなる者は愛なり。",
+            "パウロ『コリントの信徒への手紙一』（コリント前書）13:13、正教会訳。",
+        ),
+        (
+            """<li><a href="/wiki/%E5%A4%AA%E9%99%BD" title="太陽">太陽</a>と他の<a href="/wiki/%E6%98%9F" title="星">星</a>を動かす愛 -<a href="/wiki/%E3%83%80%E3%83%B3%E3%83%86%E3%83%BB%E3%82%A2%E3%83%AA%E3%82%AE%E3%82%A8%E3%83%BC%E3%83%AA" title="ダンテ・アリギエーリ">ダンテ・アリギエーリ</a>
+<ul><li>天国篇第33歌最終行</li></ul></li>""",
+            "太陽と他の星を動かす愛",
+            "ダンテ・アリギエーリ",
+        ),
+        (
+            """<li data-immersive-translate-walked="eacc4ab1-3668-43d9-8280-ae8c04f4be8c" data-immersive-translate-paragraph="1">愛から出たのでない知とは何でしょうか？ -- <a href="/w/index.php?title=%E3%83%99%E3%83%83%E3%83%86%E3%82%A3%E3%83%BC%E3%83%8A%E3%83%BB%E3%83%95%E3%82%A9%E3%83%B3%E3%83%BB%E3%82%A2%E3%83%AB%E3%83%8B%E3%83%A0&amp;action=edit&amp;redlink=1" class="new" title="「ベッティーナ・フォン・アルニム」 (存在しないページ)" data-immersive-translate-walked="eacc4ab1-3668-43d9-8280-ae8c04f4be8c">ベッティーナ・フォン・アルニム</a>、ゲーテへの手紙
+<dl data-immersive-translate-walked="eacc4ab1-3668-43d9-8280-ae8c04f4be8c"><dd data-immersive-translate-walked="eacc4ab1-3668-43d9-8280-ae8c04f4be8c" data-immersive-translate-paragraph="1">"Was ist Wissen, das nicht von der Liebe ausgeht?" - Bettina von Arnim, Goethes Briefwechsel mit einem Kinde</dd></dl></li>""",
+            "愛から出たのでない知とは何でしょうか？",
+            "ベッティーナ・フォン・アルニム、ゲーテへの手紙",
+        ),
+    ]
+    crawler = JaWikiQuoteCrawler()
+    for html, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find("li")
         cookie = crawler.parse_item(element)
         assert cookie.content == content
         assert cookie.source == source

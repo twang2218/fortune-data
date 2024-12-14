@@ -182,16 +182,33 @@ class WikiQuoteCrawler(Crawler):
                 source = source.strip().lstrip(leading).strip()
         return source.strip()
 
-    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+    def get_parse_source_from_content_patterns(self) -> List[str]:
+        patterns = []
+
+        # History would be an excellent thing if only it were true. (Leo Tolstoy)
         left = "".join([f"{p}" for p in self.parentheses_left])
         right = "".join([f"{p}" for p in self.parentheses_right])
-        pattern = re.compile(r"^(.*?)(?:[" + left + r"](.*?)[" + right + r"])\s*$")
-        m = pattern.match(content)
-        if m:
-            quote = m.group(1).strip()
-            source = m.group(2).strip()
-            if quote and source:
-                return quote, source
+        pattern = r"^(.*?)(?:[" + left + r"](.*?)[" + right + r"])\s*$"
+        patterns.append(pattern)
+
+        # 31. History would be an excellent thing if only it were true. ~ Leo Tolstoy
+        leading = "|".join(self.source_leadings)
+        leading = r"(?:\s*(?:" + leading + r"))"
+        index = r"(?:\d+\.?\s+)?"
+        group = r"(.*?)"
+        pattern = r"^" + index + group + leading + r"\s+" + group + leading + r"?\s*$"
+        patterns.append(pattern)
+
+        return patterns
+
+    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+        for pattern in self.get_parse_source_from_content_patterns():
+            m = re.match(pattern, content, re.MULTILINE | re.DOTALL)
+            if m:
+                quote = m.group(1).strip()
+                source = m.group(2).strip()
+                if quote and source:
+                    return quote, source
 
         logger.debug(f"Failed to extract source from content: {content}")
         return content, ""
@@ -257,9 +274,6 @@ class WikiQuoteCrawler(Crawler):
     def extract(jar: CookieJar) -> List[Cookie]:
         parts = jar.extractor.split(".")
         match parts[0], parts[1], parts[2]:
-            case "crawler", "wikiquote", "zh":
-                crawler = ZhWikiQuoteCrawler()
-                return crawler.crawl(jar)
             case "crawler", "wikiquote", "en":
                 if len(parts) > 3 and parts[3] == "daily":
                     crawler = DailyEnWikiQuoteCrawler()
@@ -288,6 +302,13 @@ class WikiQuoteCrawler(Crawler):
                 else:
                     crawler = FrWikiQuoteCrawler()
                     return crawler.crawl(jar)
+            case "crawler", "wikiquote", "ja":
+                if len(parts) > 3 and parts[3] == "daily":
+                    crawler = DailyJaWikiQuoteCrawler()
+                    return crawler.crawl(jar)
+                else:
+                    crawler = JaWikiQuoteCrawler()
+                    return crawler.crawl(jar)
             case "crawler", "wikiquote", "ru":
                 if len(parts) > 3 and parts[3] == "daily":
                     crawler = DailyRuWikiQuoteCrawler()
@@ -295,9 +316,12 @@ class WikiQuoteCrawler(Crawler):
                 else:
                     crawler = RuWikiQuoteCrawler()
                     return crawler.crawl(jar)
+            case "crawler", "wikiquote", "zh":
+                crawler = ZhWikiQuoteCrawler()
+                return crawler.crawl(jar)
             case "crawler", "wikiquote", _:
                 crawler = WikiQuoteCrawler()
-                return crawler.crawl
+                return crawler.crawl(jar)
             case _:
                 raise ValueError(
                     f"WikiQuoteCrawler: Invalid extractor: {jar.extractor}"
@@ -318,25 +342,6 @@ class DailyEnWikiQuoteCrawler(EnWikiQuoteCrawler):
             ("li", "> ol > li"),
         ]
     )
-
-    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
-        leading = "|".join(self.source_leadings)
-        leading = r"(?:\s*(?:" + leading + r"))"
-        index = r"(?:\d+\.?\s+)?"
-        cap_group = r"(.*?)"
-        pattern = (
-            r"^" + index + cap_group + leading + r"\s+" + cap_group + leading + r"?\s*$"
-        )
-        # print(pattern)
-        pattern = re.compile(pattern, re.MULTILINE | re.DOTALL)
-        m = pattern.match(content)
-        if m:
-            quote = m.group(1).strip()
-            source = m.group(2).strip()
-            if quote and source:
-                return quote, source
-
-        return content, ""
 
     def crawl(self, jar: CookieJar) -> List[Cookie]:
         logger.info(f"开始爬取 《{jar.name}》")
@@ -474,7 +479,10 @@ class DeWikiQuoteCrawler(WikiQuoteCrawler):
         + ["aus", "von", "zitiert in", "zitiert nach"],
     )
 
-    def parse_source_from_content(self, content: str) -> Tuple[str, str]:
+    def get_parse_source_from_content_patterns(self) -> List[str]:
+        patterns = super().get_parse_source_from_content_patterns()
+
+        # "Adel verpflichtet." (Noblesse oblige) - nach Pierre-Marc-Gaston de Lévis, Maximes et réflections
         leadings = "|".join(self.source_leadings)
         leadings = f"(?:{leadings})?"
         comments = r"(?:\(.*?\))?"
@@ -487,15 +495,9 @@ class DeWikiQuoteCrawler(WikiQuoteCrawler):
             + comments
             + r"\s*$"
         )
-        # print(pattern)
-        pattern = re.compile(pattern)
-        m = pattern.match(content)
-        if m:
-            quote = m.group(1).strip()
-            source = m.group(2).strip()
-            return quote, source
-        else:
-            return content, ""
+        patterns.insert(0, pattern)
+
+        return patterns
 
 
 class DailyDeWikiQuoteCrawler(DeWikiQuoteCrawler):
@@ -628,6 +630,43 @@ class DailyFrWikiQuoteCrawler(FrWikiQuoteCrawler):
 
         logger.info(f"爬取 《{jar.name}》完成，共 {len(cookies)} 条名言")
         return cookies
+
+
+class JaWikiQuoteCrawler(WikiQuoteCrawler):
+    blacklist: List[str] = Field(
+        default=WikiQuoteCrawler.model_fields["blacklist"].default
+        + [
+            "関連項目",
+            "参考文献",
+            "外部リンク",
+            "脚注",
+            "出典",
+            "注釈",
+            "関連項目・外部リンク",
+            "関連項目、外部リンク",
+            "関連語句",
+        ],
+    )
+
+    def get_source_finders(self) -> List[Callable]:
+        # disable source finding
+        return []
+
+    def get_parse_source_from_content_patterns(self) -> List[str]:
+        patterns = super().get_parse_source_from_content_patterns()
+
+        # 今は信、望、愛、此の三つのもの存す。其中に最も大いなる者は愛なり。--パウロ『コリントの信徒への手紙一』（コリント前書）13:13、正教会訳。
+        leadings = "|".join(self.source_leadings)
+        leadings = f"(?:{leadings})"
+        group = r"(.*?)"
+        pattern = r"^" + group + r"\s*" + leadings + r"\s*" + group + r"\s*$"
+        patterns.insert(0, pattern)
+
+        return patterns
+
+
+class DailyJaWikiQuoteCrawler(JaWikiQuoteCrawler):
+    pass
 
 
 class RuWikiQuoteCrawler(WikiQuoteCrawler):
