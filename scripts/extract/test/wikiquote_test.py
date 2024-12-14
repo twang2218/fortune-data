@@ -1,13 +1,15 @@
 from bs4 import BeautifulSoup
 from extract import (
     DailyEnWikiQuoteCrawler,
-    DeWikiQuoteCrawler,
     # EnWikiQuoteCrawler,
     DailyEsWikiQuoteCrawler,
+    DailyFrWikiQuoteCrawler,
+    DeWikiQuoteCrawler,
     FrWikiQuoteCrawler,
     RuWikiQuoteCrawler,
     ZhWikiQuoteCrawler,
 )
+
 
 def test_crawler_wikiquote_es():
     testcases = [
@@ -45,6 +47,7 @@ def test_crawler_wikiquote_es():
         cookie = crawler.parse_item(element)
         assert cookie.content == content
         assert cookie.source == source
+
 
 def test_crawler_wikiquote_de():
     testcases = [
@@ -150,6 +153,37 @@ def test_crawler_wikiquote_fr():
     ]
 
     crawler = FrWikiQuoteCrawler()
+    for html, content, source in testcases:
+        soup = BeautifulSoup(html, "html5lib")
+        element = soup.find("div")
+        cookie = crawler.parse_item(element)
+        assert cookie.content == content
+        assert cookie.source == source
+
+
+def test_crawler_wikiquote_fr_daily():
+    testcases = [
+        (
+            """<div style="text-align:center;">
+<i>Ma plume est une aile et sans cesse, soutenu par elle et par son ombre projetée sur le papier, chaque mot se précipite vers la catastrophe ou vers l'apothéose.</i>&nbsp;—&nbsp;Robert Desnos</div>""",
+            "Ma plume est une aile et sans cesse, soutenu par elle et par son ombre projetée sur le papier, chaque mot se précipite vers la catastrophe ou vers l'apothéose.",
+            "Robert Desnos",
+        ),
+        (
+            """<div style="text-align:center;">
+<i>Détective Mike Mac Adam&nbsp;: Vous permettez que je détecte&nbsp;?…</i>&nbsp;—&nbsp;<i>Tintin en Amérique</i></div>""",
+            "Détective Mike Mac Adam : Vous permettez que je détecte ?…",
+            "Tintin en Amérique",
+        ),
+        (
+            """<div style="text-align:center;">
+<i>&lt;poem&gt;<div class="citation">Tu aimes ça&nbsp;!! Tu veux me baiser, tu vas baiser avec le meilleur. Tu crois que tu vas me baiser, il faudra toute une armée pour m'enculer.</div></i>&nbsp;—&nbsp;<a href="https://fr.wikipedia.org/wiki/fr:Al_Pacino" class="extiw" title="w:fr:Al Pacino">Al Pacino</a></div>""",
+            "<poem>Tu aimes ça !! Tu veux me baiser, tu vas baiser avec le meilleur. Tu crois que tu vas me baiser, il faudra toute une armée pour m'enculer.",
+            "Al Pacino",
+        ),
+    ]
+
+    crawler = DailyFrWikiQuoteCrawler()
     for html, content, source in testcases:
         soup = BeautifulSoup(html, "html5lib")
         element = soup.find("div")

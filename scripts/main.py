@@ -126,5 +126,6 @@ def main():
     for lang, lang_cookies in cookies.items():
         logger.info(f"  [tier2] '{lang}': {len(lang_cookies)} cookies.")
 
+
 if __name__ == "__main__":
     main()

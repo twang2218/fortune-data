@@ -99,6 +99,8 @@
 {"lang": "fr", "name": "Vieillesse", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "fr", "name": "Vin", "extractor": "crawler.wikiquote.fr", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
+{"lang": "fr", "name": "Daily", "extractor": "crawler.wikiquote.fr.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
 // ru
 
 {"lang": "ru", "name": "Daily", "extractor": "crawler.wikiquote.ru.daily", "model_name": "openai:gpt-4o-mini", "is_category": true}
@@ -124,6 +126,19 @@
 {"lang": "ru", "name": "Человечество", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "ru", "name": "Чувство", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
 {"lang": "ru", "name": "Этика", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+
+{"lang": "ru", "name": "Любовь", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Война", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Счастье", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Россия", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Жизнь", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Мечта", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Мудрость", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Дружба", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Свобода", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Музыка", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Смерть", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
+{"lang": "ru", "name": "Русские_пословицы", "extractor": "crawler.wikiquote.ru", "model_name": "openai:gpt-4o-mini", "is_category": true}
 
 
 // zh
