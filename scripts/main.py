@@ -173,8 +173,8 @@ def show_stats():
 
     print("### Details")
     print()
-    print("| lang | jars | crawled |  tier2  | tier1 |")
-    print("|------|------|---------|---------|-------|")
+    print("| lang | jars | crawled |      tier2      |     tier1      |")
+    print("|------|------|---------|-----------------|----------------|")
     for lang, lang_stats in stats.items():
         num_jars += len(lang_stats["jars"])
         num_crawled += lang_stats["crawled"]
@@ -182,7 +182,7 @@ def show_stats():
         num_tier2 += lang_stats["tier2"]
         # print(f"lang: [{lang}],\t jars: {len(lang_stats['jars'])},\t crawled: {lang_stats['crawled']:5},\t tier2: {lang_stats['tier2']:5} [{lang_stats['tier2']/lang_stats['crawled']*100:.1f}%],\t tier1: {lang_stats['tier1']:4}")
         print(
-            f"| {lang:4} | {len(lang_stats['jars']):4} | {lang_stats['crawled']:6}  | {lang_stats['tier2']:6}  | {lang_stats['tier1']:5} |"
+            f"| {lang:4} | {len(lang_stats['jars']):4} | {lang_stats['crawled']:6}  | {lang_stats['tier2']:6} ({lang_stats['tier2']/lang_stats['crawled']*100:4.1f}%)  | {lang_stats['tier1']:5} ({lang_stats['tier1']/lang_stats['tier2']*100:4.1f}%)  |"
         )
 
     print()
@@ -193,15 +193,15 @@ def show_stats():
     # print(f"Total crawled:\t {num_crawled:5}")
     # print(f"Total tier2:\t {num_tier2:5}\t[{num_tier2/num_crawled*100:.1f}%]")
     # print(f"Total tier1:\t {num_tier1:5}")
-    print(f"|    title      |  value  |           notes          |")
+    print(f"|    title      |  count  |           notes          |")
     print("|---------------|---------|--------------------------|")
     print(f"| Total langs   | {len(stats):6}  | [{', '.join(stats.keys())}] |")
     print(f"| Total jars    | {num_jars:6}  |                          |")
     print(f"| Total crawled | {num_crawled:6}  |                          |")
     print(
-        f"| Total tier2   | {num_tier2:6}  |          {num_tier2/num_crawled*100:.1f}%           |"
+        f"| Total tier2   | {num_tier2:6}  |         ({num_tier2/num_crawled*100:4.1f}%)          |"
     )
-    print(f"| Total tier1   | {num_tier1:6}  |                          |")
+    print(f"| Total tier1   | {num_tier1:6}  |         ({num_tier1/num_tier2*100:4.1f}%)          |")
     print()
 
 
