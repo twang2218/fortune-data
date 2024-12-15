@@ -1,4 +1,6 @@
 COOKIES_DIR = cookies
+PACKAGE_DIR = dist
+VERSION = 0.1.0
 
 generate:
 	uv run scripts/main.py
@@ -30,6 +32,18 @@ clean-data:
 clean-cache:
 	rm -rf .cache
 
+clean-dist:
+	rm -rf $(PACKAGE_DIR)
+
 format:
 	ruff check --select I --fix
 	ruff format
+
+package: clean-dist
+	mkdir -p $(PACKAGE_DIR)
+	cp -r $(COOKIES_DIR)/tier1 $(PACKAGE_DIR)/
+	cp -r $(COOKIES_DIR)/tier2 $(PACKAGE_DIR)/
+	cp LICENSE-DATA $(PACKAGE_DIR)/
+	cp NOTICE $(PACKAGE_DIR)/
+	cd $(PACKAGE_DIR) && zip -r fortune-data-$(VERSION).zip tier1 tier2 LICENSE-DATA NOTICE
+	@echo "Package created: $(PACKAGE_DIR)/fortune-data-$(VERSION).zip"
