@@ -199,9 +199,24 @@ def show_stats():
     # print(f"Total crawled:\t {num_crawled:5}")
     # print(f"Total tier2:\t {num_tier2:5}\t[{num_tier2/num_crawled*100:.1f}%]")
     # print(f"Total tier1:\t {num_tier1:5}")
+
+    flags_by_langs = {
+        "de": "🇩🇪",
+        "en": "🇺🇸",
+        "es": "🇪🇸",
+        "fr": "🇫🇷",
+        "it": "🇮🇹",
+        "ja": "🇯🇵",
+        "ko": "🇰🇷",
+        "ru": "🇷🇺",
+        "zh": "🇨🇳",
+    }
+
+    flags = "".join([flags_by_langs[lang] for lang in stats.keys()])
+
     print(f"|    title      |  count  |           notes          |")
     print("|---------------|---------|--------------------------|")
-    print(f"| Total langs   | {len(stats):6}  | [{', '.join(stats.keys())}] |")
+    print(f"| Total langs   | {len(stats):6}  | {flags} |")
     print(f"| Total jars    | {num_jars:6}  |                          |")
     print(f"| Total crawled | {num_crawled:6}  |                          |")
     print(

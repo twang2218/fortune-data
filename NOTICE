@@ -1,0 +1,39 @@
+Fortune Data Collection Project
+Copyright (c) 2024 Fortune Data Collection Project Contributors
+
+This project uses a dual-license approach:
+
+1. Source Code License (MIT)
+   All source code in this project, including but not limited to:
+   - Python scripts in the 'scripts/' directory
+   - Configuration files
+   - Build scripts
+   is licensed under the MIT License. See LICENSE file for details.
+
+2. Data License (CC BY-SA 3.0)
+   All data files, including but not limited to:
+   - Fortune cookie content in 'cookies/' directory
+   - Processed and raw data
+   - Curated collections
+   are licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.
+   See LICENSE-DATA file for details.
+
+Attribution Requirements:
+
+For code usage:
+- Include the MIT License notice
+- Include this NOTICE file
+- Attribute the Fortune Data Collection Project
+
+For data usage:
+- Provide appropriate attribution to the Fortune Data Collection Project
+- Include a link to the CC BY-SA 3.0 license
+- Indicate if changes were made
+- Maintain the ShareAlike requirement by sharing any derivative works under the same license
+- When using specific content, also attribute the original sources as listed in LICENSE-DATA
+
+Third-Party Content:
+This project includes content from various third-party sources, each maintaining their own license terms. See LICENSE-DATA for details about specific data sources and their attribution requirements.
+
+Note on Data Sources:
+The fortune cookie data in this project is derived from various public sources. While we make this derived work available under CC BY-SA 3.0, users should be aware that individual source materials may have their own terms of use. We encourage users to review and comply with the original source terms when using specific content.
